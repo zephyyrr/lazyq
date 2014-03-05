@@ -2,7 +2,7 @@ var express = require('express');
 
 var app = express();
 
-app.use('/media', express.static(__dirname + '/media'));
+//app.use('/media', express.static(__dirname + '/media'));
 app.use(express.static(__dirname + '/public'));
 
 app.listen(8080);
@@ -67,7 +67,7 @@ var addClientTo, removeClient, chanOf, logChannels, getChannel;
 	var clientChannel = new Map;
 
 	courses.forEach(function (course) {
-		channels[course] = [];
+		channels[course] = [1];
 	});
 
 	/**

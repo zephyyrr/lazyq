@@ -1,31 +1,27 @@
 angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 
-.config(['$routeProvider', '$locationProvider', function ($route, $location) {
+.config(['$routeProvider', '$locationProvider',	function ($route, $location) {
+
 	$route
 	.when('/list', {
 		templateUrl: 'template/list.html',
 		controller: 'ListCtrl',
 		resolve: {
 			courses: ['$http', '$q', function ($http, $q) {
-				var deferred = $q.defer();
-				$http.get('/list').success(deferred.resolve);
-				return deferred.promise;
+				return $http.get('/list').then(function (d) { return d.data });
 			}]
 		}
 	})
 	.when('/list/:course', {
 		templateUrl: 'template/queue.html',
-		controller: 'QueueCtrl',
-		resolve: {
-			// list: ['$http', '$q', function ($http, $q) {
-			// 	var deferred = $q.defer();
-			// 	$http.get('/list/' + params.course).success(deferred.resolve);
-			// 	return deferred.promise;
-			// }]
-		}
+		controller: 'QueueCtrl'
+	})
+	.when('/name', {
+		templateUrl: 'template/namepicker.html',
+		controller: 'NameCtrl'
 	})
 	.otherwise({
-		redirectTo: '/list'
+		redirectTo: '/name'
 	});
 }])
 
@@ -34,11 +30,116 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	$scope.$on('searchEvent', function(event, query) {
 		$scope.query = query
 	})
+
 	$scope.courses = courses;
+	console.log(User.getName());
 }])
 
-.controller('QueueCtrl', ['$scope', '$http', '$routeParams', function ($scope, $http, params) {
-	$scope.list = $http.get('/list/' + params.course);
+.factory('UserService', function () {
+	var username = localStorage.getItem('name') || void 0;
+
+	return {
+		setName: function (name) {
+			localStorage.setItem('name', name);
+		},
+		getName: function () {
+			return username;
+		}
+	}
+})
+
+.factory('QueueService', ['$http', '$q', function ($http, $q) {
+	return {
+		forCourse: function (name) {
+			return $http.get('/list/' + name);
+		}
+	}
+}])
+
+/**
+ * The SocketService represents the websocket connection to the server.
+ */
+.factory('SocketService', [function () {
+	var ws = new WebSocket("ws://" + location.hostname + ":8000");
+
+	ws.onmessage = function () {
+
+	};
+
+	function send(course, cmd, data) {
+		var pack = course + '/' + cmd + ':' + angular.toJson(data);
+	}
+
+	var commands = ['insert', 'remove'];
+
+	function makeCommands(course) {
+		var o = {};
+
+		commands.forEach(function (cmd) {
+			o[cmd] = send.bind(null, course, cmd);
+		});
+
+		return o;
+	}
+
+	return {
+		/**
+		 * Subscribes to a course, and gets notified of changes to
+		 * the course's queue through it's callback.
+		 *
+		 * @param {string} course
+		 * @param {Function} insert
+		 * @param {Function} remove
+		 */
+		subscribeTo: function (course, insert, remove) {
+			//route(course, insert, remove);
+			return makeCommands(course);
+		}
+	}
+}])
+
+.controller('QueueCtrl', ['$scope', '$routeParams', 'UserService', 'QueueService', 'SocketService', function ($scope, params, User, Queue, Socket) {
+	$scope.course = params.course;
+	Queue.forCourse(params.course).then(function (res) {
+		$scope.queue = res.data;
+	});
+
+	// Default action is "help"
+	$scope.action = "H";
+
+	var socket = Socket.subscribeTo(params.course,
+		function insert(user) {
+			$scope.queue.push(user);
+		},
+		function remove(user) {
+			$scope.queue = $scope.queue.filter(withName(user.name));
+		});
+
+	function withName (name) {
+		return function (usr) {
+			return usr.name === name;
+		};
+	}
+
+	$scope.addToQueue = function () {
+		if (!$scope.queue.some(withName(User.getName()))) {
+			var user = {
+				name: User.getName(),
+				action: $scope.action,
+				comment: $scope.comment
+			};
+
+			socket.insert(user);
+			$scope.queue.push(user);
+		}
+	};
+}])
+
+.controller('NameCtrl', ['$scope', 'UserService', '$location', function ($scope, User, $location) {
+	$scope.done = function () {
+		User.setName($scope.name);
+		$location.path('list');
+	};
 }])
 
 .controller('TitleCtrl', ['$scope', function ($scope) {
