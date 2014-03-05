@@ -184,6 +184,8 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 
 .controller('QueueCtrl', ['$scope', '$routeParams', 'UserService', 'QueueService', function ($scope, params, User, Queue) {
 	$scope.course = params.course;
+	$scope.queued = false;
+
 	Queue.forCourse(params.course).then(function (res) {
 		$scope.queue = res.data;
 	});
@@ -213,7 +215,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		Queue.unsubscribe();
 	});
 
-	$scope.addToQueue = function () {
+	$scope.joinQueue = function () {
 		if (!$scope.queue.some(withName(User.getName()))) {
 			var user = {
 				name: User.getName(),
@@ -222,8 +224,13 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 			};
 
 			socket.add(user);
-			//$scope.queue.push(user);
+			$scope.queued = true;
 		}
+	};
+
+	$scope.leaveQueue = function () {
+		socket.remove(user);
+		$scope.queued = false;
 	};
 }])
 
