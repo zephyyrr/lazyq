@@ -17,12 +17,11 @@ angular.module('LazyQ', ['ngRoute'])
 		templateUrl: 'template/queue.html',
 		controller: 'QueueCtrl',
 		resolve: {
-			list: ['$http', '$q', function ($http, $q) {
-				console.log(params);
-				var deferred = $q.defer();
-				$http.get('/list/' + params.course).success(deferred.resolve);
-				return deferred.promise;
-			}]
+			// list: ['$http', '$q', function ($http, $q) {
+			// 	var deferred = $q.defer();
+			// 	$http.get('/list/' + params.course).success(deferred.resolve);
+			// 	return deferred.promise;
+			// }]
 		}
 	})
 	.otherwise({
@@ -34,8 +33,8 @@ angular.module('LazyQ', ['ngRoute'])
 	$scope.courses = courses;
 }])
 
-.controller('QueueCtrl', ['$scope', 'list', function ($scope, list) {
-	$scope.list = list;
+.controller('QueueCtrl', ['$scope', '$http', '$routeParams', function ($scope, $http, params) {
+	$scope.list = $http.get('/list/' + params.course);
 }])
 
 .controller('TitleCtrl', ['$scope', function ($scope) {

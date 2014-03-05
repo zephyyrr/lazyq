@@ -42,9 +42,9 @@ app.get('/list', function (req, res) {
 	respondWithJSON(res, courses)
 });
 
-app.get('/list/:course', function (req, res, course) {
+app.get('/list/:course', function (req, res) {
 	try {
-		respondWithJSON(res, getChannel(course).map(function (obj) {
+		respondWithJSON(res, getChannel(req.params.course).map(function (obj) {
 			return {
 				name: 'unknown',
 				action: '?',
@@ -75,7 +75,13 @@ var addClientTo, removeClient, chanOf, logChannels, getChannel;
 	 * @return {!Array|undefined} queue
 	 */
 	getChannel = function (name) {
-		return channels[name];
+		var chan = channels[name];
+
+		if (!chan) {
+			throw new Error('No such course: ' + name + '!');
+		}
+
+		return chan;
 	};
 
 	/**
@@ -84,11 +90,7 @@ var addClientTo, removeClient, chanOf, logChannels, getChannel;
 	 * @param {string} name
 	 */
 	addClientTo = function (ws, name) {
-		var chan = channels[name];
-
-		if (!chan) {
-			throw new Error('No such course: ' + name + '!');
-		}
+		var chan = getChannel(name);
 
 		clientChannel.set(ws, chan);
 		chan.push(ws);
