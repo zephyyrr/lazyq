@@ -37,9 +37,12 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 .controller('SearchCtrl', ['$scope', '$location', 'courses', function ($scope, $location, courses) {
 	$scope.query = "";
 	$scope.courses = courses;
+	$scope.redirect = function(path) {
+		$location.path(path);
+	};
 	$scope.join = function() {
-		$location.path('/course/' + $scope.query);
-	}
+		$scope.redirect('/course/' + $scope.query);
+	};
 }])
 
 .controller('ListCtrl', ['$scope', 'courses', function ($scope, courses) {
