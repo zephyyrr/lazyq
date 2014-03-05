@@ -10,6 +10,10 @@ body {
 	background-color: #eee;
 }
 
+input {
+	color: #000;
+}
+
 .searchbox {
 	padding-bottom: 2em;
 	width: 80%;
