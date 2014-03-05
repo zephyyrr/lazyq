@@ -10,6 +10,13 @@ body {
 	background-color: #eee;
 }
 
+.searchbox {
+	padding-bottom: 2em;
+	width: 80%;
+	text-align: center;
+}
+
 .content {
 	padding-left: 1em;
+	padding-right: 1em;
 }

@@ -1,2 +1,10 @@
 <h1>Courses</h1>
-<p ng-repeat="c in courses | filter:query"><a href="#/list/{{c}}">{{ c }}</a></p>
+<div class="searchbox">
+	<h2>Search for a course</h2>
+	<form ng-submit="join">
+		<input type="text" typeahead="course for course in courses | filter:$viewValue | limitTo:8" 
+			class="form-control" placeholder="Search" ng-model="query">
+		<input type="submit" class="btn btn-default" value="Search">
+	</form>
+</div>
+<!--<p ng-repeat="c in courses | filter:query"><a href="#/list/{{c}}">{{ c }}</a></p>-->
