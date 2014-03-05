@@ -1,4 +1,4 @@
-angular.module('LazyQ', ['ngRoute'])
+angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 
 .config(['$routeProvider', '$locationProvider', function ($route, $location) {
 	$route
@@ -30,6 +30,10 @@ angular.module('LazyQ', ['ngRoute'])
 }])
 
 .controller('ListCtrl', ['$scope', 'courses', function ($scope, courses) {
+	$scope.query = ""
+	$scope.$on('searchEvent', function(event, query) {
+		$scope.query = query
+	})
 	$scope.courses = courses;
 }])
 
@@ -39,7 +43,21 @@ angular.module('LazyQ', ['ngRoute'])
 
 .controller('TitleCtrl', ['$scope', function ($scope) {
 	$scope.course = 'none';
+	$scope.title = "LazyQ"
 	$scope.num = 1;
+}])
+
+.controller('SearchCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
+	$scope.query = "";
+	$scope.search = function() {
+		$rootScope.$broadcast('searchEvent', $scope.query);
+	};
+}])
+
+.controller('UserCtrl', ['$scope', function ($scope) {
+	$scope.user = {
+		name: "User"
+	}
 }])
 
 .controller('WSCtrl', ['$scope', function ($scope) {
