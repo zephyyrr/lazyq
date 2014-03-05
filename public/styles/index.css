@@ -14,10 +14,15 @@ h1, h2 {
 	background-color: #eee;
 }
 
+input {
+	color: #000;
+}
+
 .searchbox {
 	padding-bottom: 2em;
 	width: 80%;
 	text-align: center;
+	margin: 0 auto;
 }
 
 .content {
