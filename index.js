@@ -38,11 +38,11 @@ function respondWithJSON(res, data) {
 
 var courses = ['inda', 'tilda', 'numme'];
 
-app.get('/list', function (req, res) {
+app.get('/api/list', function (req, res) {
 	respondWithJSON(res, courses)
 });
 
-app.get('/list/:course', function (req, res) {
+app.get('/api/list/:course', function (req, res) {
 	try {
 		respondWithJSON(res, getChannel(req.params.course).map(function (obj) {
 			return {
@@ -67,7 +67,7 @@ var addClientTo, removeClient, chanOf, logChannels, getChannel;
 	var clientChannel = new Map;
 
 	courses.forEach(function (course) {
-		channels[course] = [1];
+		channels[course] = [];
 	});
 
 	/**
