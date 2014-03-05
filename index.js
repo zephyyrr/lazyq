@@ -129,12 +129,12 @@ function parseMessage(message) {
 	var colon = message.indexOf(":");
 
 	if (colon === -1) {
-		throw JSON.stringify(["Invalid format! Should be, command:param[,param]"]);
+		throw JSON.stringify(["Invalid format! Should be, command:JSON"]);
 	}
 
 	return {
 		type: message.slice(0, colon),
-		params: message.slice(colon+1).split(",")
+		params: JSON.parse(message.slice(colon+1))
 	};
 }
 
@@ -158,6 +158,12 @@ commands.set("help", function (msg) {
 
 		socket.send("help:" + JSON.stringify([msg]));
 	}, this);
+});
+
+commands.set("course/add", function (course, user) {
+	console.log(user.name + " queued up to " +
+		(user.action == 'H' ? 'ask for help' : 'present' ) +
+		' for ' + course);
 });
 
 /**

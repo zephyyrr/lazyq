@@ -3,6 +3,15 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 .config(['$routeProvider', '$locationProvider',	function ($route, $location) {
 
 	$route
+	.when('/search', {
+		templateUrl: 'template/search.html',
+		controller: 'SearchCtrl',
+		resolve: {
+			courses: ['$http', '$q', function ($http, $q) {
+				return $http.get('/api/list').then(function (d) { return d.data });
+			}]
+		}
+	})
 	.when('/list', {
 		templateUrl: 'template/list.html',
 		controller: 'ListCtrl',
@@ -12,7 +21,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 			}]
 		}
 	})
-	.when('/list/:course', {
+	.when('/course/:course', {
 		templateUrl: 'template/queue.html',
 		controller: 'QueueCtrl'
 	})
@@ -25,9 +34,13 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	});
 }])
 
-.controller('ListCtrl', ['$scope', '$http', function ($scope, $http) {
+.controller('SearchCtrl', ['$scope', 'courses', function ($scope, courses) {
 	$scope.query = "";
-	$http.get('/api/list').then(function (d) { $scope.courses = d.data });
+	$scope.courses = courses;
+}])
+
+.controller('ListCtrl', ['$scope', 'courses', function ($scope, courses) {
+	$scope.courses = courses;
 }])
 
 .factory('UserService', function () {
@@ -167,7 +180,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 .controller('NameCtrl', ['$scope', 'UserService', '$location', function ($scope, User, $location) {
 	$scope.done = function () {
 		User.setName($scope.name);
-		$location.path('list');
+		$location.path('search');
 	};
 }])
 
