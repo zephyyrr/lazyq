@@ -92,6 +92,11 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 			}
 
 			handlers[type].push(callback);
+		},
+
+		off: function (type, callback) {
+			var h = handlers[type];
+			h.splice(h.indexOf(callback), 1);
 		}
 	};
 })
@@ -114,6 +119,8 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	}
 
 	return {
+		subscribers: null,
+
 		/**
 		 * Subscribes to a course, and gets notified of changes to
 		 * the course's queue through it's callback.
@@ -123,19 +130,23 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		 * @param {Function} remove
 		 */
 		subscribeTo: function (course, insert, remove) {
-			var args = Array.prototype.slice.call(arguments, 1);
+			var s = this.subscribers = Array.prototype.slice.call(arguments, 1);
 
-			commands.forEach(function (command, i) {
-				if (args[i]) {
-					socket.on('course/' + command, args[i]);
-				}
-			});
+			s && s.forEach(function (fn, i) {
+				socket.on('course/' + commands[i], fn);
+			}, this);
 
 			return makeCommands(course);
 		},
 
 		forCourse: function (name) {
 			return $http.get('/api/list/' + name);
+		},
+
+		unsubscribe: function () {
+			this.subscribers.forEach(function (fn, i) {
+				socket.off('course/' + commands[i], fn);
+			});
 		}
 	}
 }])
@@ -162,6 +173,10 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 			return usr.name === name;
 		};
 	}
+
+	$scope.$on('$locationChangeStart', function () {
+		socket.unsubscribe();
+	});
 
 	$scope.addToQueue = function () {
 		if (!$scope.queue.some(withName(User.getName()))) {
