@@ -25,7 +25,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	});
 }])
 
-.controller('ListCtrl', ['$scope', 'courses', function ($scope, courses) {
+.controller('ListCtrl', ['$scope', 'courses', 'UserService', function ($scope, courses, User) {
 	$scope.query = ""
 	$scope.$on('searchEvent', function(event, query) {
 		$scope.query = query
@@ -41,6 +41,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	return {
 		setName: function (name) {
 			localStorage.setItem('name', name);
+			username = name;
 		},
 		getName: function () {
 			return username;
@@ -48,35 +49,54 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	}
 })
 
-.factory('QueueService', ['$http', '$q', function ($http, $q) {
-	return {
-		forCourse: function (name) {
-			return $http.get('/list/' + name);
+.factory('WebSocketService', function () {
+	var handlers = {},
+		ws = new WebSocket("ws://" + location.hostname + ":8000");
+
+	ws.onmessage = function (e) {
+		var data = e.data,
+			cmd = data.split(":", 1)[0],
+			params = JSON.parse(data.slice(cmd.length + 1));
+
+		if (handlers[cmd]) {
+			handlers[cmd].forEach(function (callback) {
+				callback.apply(null, params);
+			});
 		}
-	}
-}])
+	};
+
+	return {
+		/**
+		 * @param {string} type
+		 * @param {...?} data
+		 */
+		send: function (type) {
+			ws.send(type + ":" +
+				angular.toJson(Array.prototype.slice.call(arguments, 1)));
+		},
+
+		on: function (type, callback) {
+			if (!handlers[type]) {
+				handlers[type] = [];
+			}
+
+			handlers[type].push(callback);
+		}
+	};
+})
 
 /**
  * The SocketService represents the websocket connection to the server.
  */
-.factory('SocketService', [function () {
-	var ws = new WebSocket("ws://" + location.hostname + ":8000");
-
-	ws.onmessage = function () {
-
-	};
-
-	function send(course, cmd, data) {
-		var pack = course + '/' + cmd + ':' + angular.toJson(data);
-	}
-
-	var commands = ['insert', 'remove'];
+.factory('QueueService', ['$http', 'WebSocketService', function ($http, socket) {
+	//socket
+	var commands = ['add', 'remove'];
 
 	function makeCommands(course) {
 		var o = {};
 
 		commands.forEach(function (cmd) {
-			o[cmd] = send.bind(null, course, cmd);
+			o[cmd] = socket.send.bind(socket, course + '/' + cmd);
 		});
 
 		return o;
@@ -92,13 +112,24 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		 * @param {Function} remove
 		 */
 		subscribeTo: function (course, insert, remove) {
-			//route(course, insert, remove);
+			var args = Array.prototype.slice.call(arguments, 1);
+
+			commands.forEach(function (command, i) {
+				if (args[i]) {
+					socket.on('course/' + command, args[i]);
+				}
+			});
+
 			return makeCommands(course);
+		},
+
+		forCourse: function (name) {
+			return $http.get('/api/list/' + name);
 		}
 	}
 }])
 
-.controller('QueueCtrl', ['$scope', '$routeParams', 'UserService', 'QueueService', 'SocketService', function ($scope, params, User, Queue, Socket) {
+.controller('QueueCtrl', ['$scope', '$routeParams', 'UserService', 'QueueService', function ($scope, params, User, Queue) {
 	$scope.course = params.course;
 	Queue.forCourse(params.course).then(function (res) {
 		$scope.queue = res.data;
@@ -107,7 +138,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	// Default action is "help"
 	$scope.action = "H";
 
-	var socket = Socket.subscribeTo(params.course,
+	var socket = Queue.subscribeTo(params.course,
 		function insert(user) {
 			$scope.queue.push(user);
 		},
@@ -153,12 +184,6 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	$scope.search = function() {
 		$rootScope.$broadcast('searchEvent', $scope.query);
 	};
-}])
-
-.controller('UserCtrl', ['$scope', function ($scope) {
-	$scope.user = {
-		name: "User"
-	}
 }])
 
 .controller('WSCtrl', ['$scope', function ($scope) {
