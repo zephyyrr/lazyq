@@ -1,4 +1,4 @@
-//Angular UI Bootstrap hack thingy
+/* Angular UI Bootstrap hack thingy */
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
 body {
