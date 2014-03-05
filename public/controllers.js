@@ -175,20 +175,6 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	$scope.num = 1;
 }])
 
-<<<<<<< HEAD
-.controller('SearchCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
-	$scope.query = "";
-	$scope.search = function() {
-		$rootScope.$broadcast('searchEvent', $scope.query);
-	};
-=======
-.controller('UserCtrl', ['$scope', function ($scope) {
-	$scope.user = {
-		name: "User"
-	}
->>>>>>> be19a5bf4769975541f78c1787130074dd169d6a
-}])
-
 .controller('WSCtrl', ['$scope', function ($scope) {
 	$scope.course = "course";
 	$scope.num = 1;
