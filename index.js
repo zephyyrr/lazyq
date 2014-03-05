@@ -140,12 +140,19 @@ function addClientTo(ws, name) {
 
 /**
  * Removes the client from it's channel.
- * @param {WebSocket} ws
+ * @param {WebSocket} socket
  */
-function removeClient(ws) {
-	var rooms = getRoomsOf(ws);
+function removeClient(socket) {
+	try {
+		var rooms = getRoomsOf(socket);
 
+		rooms.forEach(function (room) {
+			room.removeListener(socket);
+		});
 
+	} catch (e) {
+		console.error(e);
+	}
 }
 
 /**
