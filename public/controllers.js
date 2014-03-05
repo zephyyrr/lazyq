@@ -8,7 +8,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		controller: 'ListCtrl',
 		resolve: {
 			courses: ['$http', '$q', function ($http, $q) {
-				return $http.get('/list').then(function (d) { return d.data });
+				return $http.get('/api/list').then(function (d) { return d.data });
 			}]
 		}
 	})
