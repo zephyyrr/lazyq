@@ -11,8 +11,12 @@ var WebSocketServer = require("ws").Server;
 
 var wss = new WebSocketServer({port: 8000});
 
+var socketExtras = new Map();
+
 wss.on('connection', function (ws) {
 	console.log("Client connected!");
+
+	socketExtras.set(ws, {listeners: [], queues: []});
 
 	ws.on('message', function (message) {
 		try {
@@ -144,10 +148,14 @@ function addClientTo(ws, name) {
  */
 function removeClient(socket) {
 	try {
-		var rooms = getRoomsOf(socket);
+		var extra = socketExtras.get(socket);
 
-		rooms.forEach(function (room) {
-			room.removeListener(socket);
+		// extra.rooms.forEach(function (room) {
+		// 	getRoom(room).removeListener(socket);
+		// });
+
+		extra.listeners.forEach(function (room) {
+			getRoom(room).removeListener(socket);
 		});
 
 	} catch (e) {

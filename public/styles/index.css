@@ -8,6 +8,8 @@ body {
 
 h1, h2 {
 	font-family: 'Lobster';
+	/*padding: 0 1em;*/
+	text-align: center;
 }
 
 .nav {
@@ -26,6 +28,22 @@ input {
 }
 
 .content {
-	padding-left: 1em;
-	padding-right: 1em;
+/*	padding-left: 1em;
+	padding-right: 1em;*/
+}
+
+.queueControls {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	padding: 15px;
+}
+
+.queueControls .btn-group {
+	width: 60%;
+}
+
+.queueControls input[type="submit"] {
+	width: 30%;
+	right: 0;
 }

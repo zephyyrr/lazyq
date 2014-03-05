@@ -3,12 +3,16 @@
 
 <div class="queueControls">
 	<form ng-hide="queued" ng-submit="joinQueue()">
-		<label>Help: <input type="radio" ng-model="action" value="H"></label>
-		<label>Present: <input type="radio" ng-model="action" value="P"></label>
-		<input type="text" ng-model="comment">
-		<input class="btn btn-default" type="submit" value="Enqueue">
+		<input class="form-control" style="width: 100%;" type="text" ng-model="comment" placeholder="Comment...">
+
+		<div class="btn-group">
+      <button type="button" class="btn btn-default" ng-model="action" btn-radio="'H'">Help</button>
+      <button type="button" class="btn btn-default" ng-model="action" btn-radio="'P'">Present</button>
+    </div>
+
+		<input class="btn btn-primary" type="submit" value="Enqueue">
 	</form>
-	
+
 	<form ng-show="queued" ng-submit="leaveQueue()">
 		<input class="btn btn-default" type="submit" value="Dequeue">
 	</form>

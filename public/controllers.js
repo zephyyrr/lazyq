@@ -1,3 +1,9 @@
+function not(fn) {
+	return function () {
+		return !fn.apply(this, arguments);
+	};
+}
+
 angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 
 .config(['$routeProvider', '$locationProvider',	function ($route, $location) {
@@ -187,10 +193,10 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 
 .controller('QueueCtrl', ['$scope', '$routeParams', 'UserService', 'QueueService', function ($scope, params, User, Queue) {
 	$scope.course = params.course;
-	$scope.queued = false;
 
 	Queue.forCourse(params.course).then(function (res) {
 		$scope.queue = res.data;
+		$scope.queued = res.data.some(withName(User.getName()));
 	});
 
 	// Default action is "help"
@@ -205,7 +211,9 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		},
 		function remove(course, username) {
 			console.log(course, username);
-			$scope.queue = $scope.queue.filter(withName(user.name));
+			$scope.$apply(function () {
+				$scope.queue = $scope.queue.filter(not(withName(username)));
+			});
 		});
 
 	function withName (name) {
@@ -232,7 +240,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	};
 
 	$scope.leaveQueue = function () {
-		socket.remove(user);
+		socket.remove(User.getName());
 		$scope.queued = false;
 	};
 }])
