@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html ng-app="Lazy">
+<head>
+	<meta charset="utf-8">
+	<title ng-controller="TitleCtrl">{{ title }}</title>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular-route.min.js"></script>
+	<script src="controllers.js"></script>
+</head>
+<body>
+<div ng-view></div>
+<!--
+<div ng-controller="WSCtrl">
+	<h1>Course: {{course}}</h1>
+	<form ng-submit="sendCommand()">
+		<label>Command: <input id="command" type="text" autocomplete="off"></label>
+	</form>
+	<h2>Result</h2>
+	<p><b>{{cmd}}</b>{{params}}</p>
+</div>
+-->
+</body>
+</html>

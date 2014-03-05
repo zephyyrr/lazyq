@@ -1,0 +1,20 @@
+{
+  "name": "Lazy",
+  "version": "0.0.0",
+  "description": "People are Lazy and don't like Sima.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --harmony index.js"
+  },
+  "repository": "",
+  "keywords": [
+    "lazy",
+    "sima"
+  ],
+  "author": "Johan, Oskar, Robert",
+  "license": "BSD",
+  "dependencies": {
+    "ws": "~0.4.31"
+  }
+}

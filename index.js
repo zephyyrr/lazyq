@@ -1,0 +1,171 @@
+var express = require('express');
+
+var server = express();
+
+server.configure(function(){
+  server.use('/media', express.static(__dirname + '/media'));
+  server.use(express.static(__dirname + '/public'));
+});
+
+server.listen(8080);
+
+var WebSocketServer = require("ws").Server;
+
+var wss = new WebSocketServer({port: 8000});
+
+wss.on('connection', function (ws) {
+	console.log("Client connected!");
+
+	ws.on('message', function (message) {
+		try {
+			commandFrom(ws, parseMessage(message));
+		} catch (e) {
+			if (e instanceof Error) {
+				e = JSON.stringify([e.message]);
+			}
+			ws.send("error:" + e);
+		}
+	});
+
+	ws.on('close', function () {
+		console.log("Client disconnected!");
+		removeClient(ws);
+	});
+});
+
+function respondWithJSON(res, data) {
+	res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify(data));
+}
+
+server.get('/list', function (req, res) {
+	respondWithJSON(res, ['inda', 'tilda', 'numme'])
+});
+
+server.get('/list/:course', function (req, res, course) {
+	var queue = getChannel(course);
+
+	if (!queue) {
+		return respondWithJSON(res, []);
+	}
+
+	respondWithJSON(res, queue.map(function (obj) {
+		return {
+			name: 'unknown',
+			action: '?',
+			comment: '<blank>'
+		};
+	}));
+});
+
+/**
+ * Nice encapsulation
+ */
+var addClientTo, removeClient, chanOf, logChannels, getChannel;
+(function () {
+	var channels = {};
+	var clientChannel = new Map;
+
+	/**
+	 * @param {string} name
+	 * @return {!Array|undefined} queue
+	 */
+	getChannel = function (name) {
+		return channels[name];
+	};
+
+	/**
+	 * Adds the client to the channel.
+	 * @param {WebSocket} ws
+	 * @param {string} name
+	 */
+	addClientTo = function (ws, name) {
+		var chan = channels[name];
+
+		if (!chan) {
+			chan = [];
+			channels[name] = chan;
+		}
+
+		clientChannel.set(ws, chan);
+		chan.push(ws);
+	};
+
+	/**
+	 * Removes the client from it's channel.
+	 * @param {WebSocket} ws
+	 */
+	removeClient = function (ws) {
+		var chan = clientChannel.get(ws);
+
+		if (chan) {
+			clientChannel.delete(ws);
+			chan.splice(chan.indexOf(ws), 1);
+		}
+	};
+
+	/**
+	 * @param {WebSocket} ws
+	 */
+	channelOf = function (ws) {
+		return clientChannel.get(ws);
+	};
+
+	logChannels = function () {
+		console.log(channels);
+	};
+})();
+
+/**
+ * @param {string} message
+ * @return {{type: string, params: Array}}
+ */
+function parseMessage(message) {
+	var colon = message.indexOf(":");
+
+	if (colon === -1) {
+		throw JSON.stringify(["Invalid format! Should be, command:param[,param]"]);
+	}
+
+	return {
+		type: message.slice(0, colon),
+		params: message.slice(colon+1).split(",")
+	};
+}
+
+/** @type {Map.<string, Function>} */
+var commands = new Map();
+
+commands.set("echo", function (x) {
+	this.send("result:" + JSON.stringify([x]));
+});
+
+commands.set("course", function (name) {
+	removeClient(this);
+	addClientTo(this, name);
+	this.send("result:[\"joined course list " + name + "\"]");
+	logChannels();
+});
+
+commands.set("help", function (msg) {
+	channelOf(this).forEach(function (socket) {
+		if (socket === this) return;
+
+		socket.send("help:" + JSON.stringify([msg]));
+	}, this);
+});
+
+/**
+ * @param {WebSocket} ws
+ * @param {{type: string, params: Array}} command
+ */
+function commandFrom(ws, command) {
+	/** @type {Function} */
+	var cmd = commands.get(command.type);
+
+	if (cmd) {
+		cmd.apply(ws, command.params);
+	} else {
+		throw new Error("No such command: " + command.type);
+	}
+}
