@@ -1,6 +1,6 @@
-angular.module('Lazy', ['ngRoute'])
+angular.module('LazyQ', ['ngRoute'])
 
-.config(['$routeProvider', function ($route) {
+.config(['$routeProvider', '$locationProvider', function ($route, $location) {
 	$route
 	.when('/list', {
 		templateUrl: 'template/list.html',
@@ -14,12 +14,13 @@ angular.module('Lazy', ['ngRoute'])
 		}
 	})
 	.when('/list/:course', {
-		templateUrl: 'template/list_course.html',
-		controller: 'ListCourseCtrl',
+		templateUrl: 'template/queue.html',
+		controller: 'QueueCtrl',
 		resolve: {
-			courses: ['$http', '$q', function ($http, $q) {
+			list: ['$http', '$q', function ($http, $q) {
+				console.log(params);
 				var deferred = $q.defer();
-				$http.get('/list').success(deferred.resolve);
+				$http.get('/list/' + params.course).success(deferred.resolve);
 				return deferred.promise;
 			}]
 		}
@@ -31,6 +32,10 @@ angular.module('Lazy', ['ngRoute'])
 
 .controller('ListCtrl', ['$scope', 'courses', function ($scope, courses) {
 	$scope.courses = courses;
+}])
+
+.controller('QueueCtrl', ['$scope', 'list', function ($scope, list) {
+	$scope.list = list;
 }])
 
 .controller('TitleCtrl', ['$scope', function ($scope) {

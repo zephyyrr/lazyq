@@ -1,13 +1,11 @@
 var express = require('express');
 
-var server = express();
+var app = express();
 
-server.configure(function(){
-  server.use('/media', express.static(__dirname + '/media'));
-  server.use(express.static(__dirname + '/public'));
-});
+app.use('/media', express.static(__dirname + '/media'));
+app.use(express.static(__dirname + '/public'));
 
-server.listen(8080);
+app.listen(8080);
 
 var WebSocketServer = require("ws").Server;
 
@@ -38,24 +36,26 @@ function respondWithJSON(res, data) {
   res.end(JSON.stringify(data));
 }
 
-server.get('/list', function (req, res) {
-	respondWithJSON(res, ['inda', 'tilda', 'numme'])
+var courses = ['inda', 'tilda', 'numme'];
+
+app.get('/list', function (req, res) {
+	respondWithJSON(res, courses)
 });
 
-server.get('/list/:course', function (req, res, course) {
-	var queue = getChannel(course);
+app.get('/list/:course', function (req, res, course) {
+	try {
+		respondWithJSON(res, getChannel(course).map(function (obj) {
+			return {
+				name: 'unknown',
+				action: '?',
+				comment: '<blank>'
+			};
+		}));
 
-	if (!queue) {
-		return respondWithJSON(res, []);
+	} catch (e) {
+		res.status(404);
+		return respondWithJSON(res, e.message);
 	}
-
-	respondWithJSON(res, queue.map(function (obj) {
-		return {
-			name: 'unknown',
-			action: '?',
-			comment: '<blank>'
-		};
-	}));
 });
 
 /**
@@ -65,6 +65,10 @@ var addClientTo, removeClient, chanOf, logChannels, getChannel;
 (function () {
 	var channels = {};
 	var clientChannel = new Map;
+
+	courses.forEach(function (course) {
+		channels[course] = [];
+	});
 
 	/**
 	 * @param {string} name
@@ -83,8 +87,7 @@ var addClientTo, removeClient, chanOf, logChannels, getChannel;
 		var chan = channels[name];
 
 		if (!chan) {
-			chan = [];
-			channels[name] = chan;
+			throw new Error('No such course: ' + name + '!');
 		}
 
 		clientChannel.set(ws, chan);
