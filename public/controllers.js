@@ -27,8 +27,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 
 .controller('ListCtrl', ['$scope', '$http', function ($scope, $http) {
 	$scope.query = "";
-
-	$scope.courses = $http.get('/list').then(function (d) { return d.data });
+	$http.get('/list').then(function (d) { $scope.courses = d.data });
 }])
 
 .factory('UserService', function () {

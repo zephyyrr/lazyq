@@ -1,7 +1,7 @@
 <h1>Courses</h1>
 <div class="searchbox">
 	<h2>Search for a course</h2>
-	<form submit="#/list/{{query}}">
+	<form ng-submit="join">
 		<input type="text" typeahead="course for course in courses | filter:$viewValue | limitTo:8" 
 			class="form-control" placeholder="Search" ng-model="query">
 		<input type="submit" class="btn btn-default" value="Search">
