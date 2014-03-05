@@ -1,5 +1,5 @@
 <h1>List: {{ course }}</h1>
-<p ng-repeat="user in queue">{{ user.name }} {{ user.action }} {{ user.comment }}</p>
+<p ng-repeat="user in queue">#{{ $index + 1 }} {{ user.name }} {{ user.action }} {{ user.comment }}</p>
 
 <form ng-submit="addToQueue()">
 	<label>Help: <input type="radio" ng-model="action" value="H"></label>
