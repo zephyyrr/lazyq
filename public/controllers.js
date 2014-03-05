@@ -28,7 +28,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 .controller('ListCtrl', ['$scope', '$http', function ($scope, $http) {
 	$scope.query = "";
 
-	$scope.courses = $http.get('/list').then(function (d) { return d.data });
+	$scope.courses = $http.get('/api/list').then(function (d) { return d.data });
 }])
 
 .factory('UserService', function () {
@@ -46,8 +46,11 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 })
 
 .factory('WebSocketService', function () {
-	var handlers = {},
-		ws = new WebSocket("ws://" + location.hostname + ":8000");
+	var handlers = {
+		'error': [function (d) { console.error("ServerError: " + d); }]
+	};
+
+	var ws = new WebSocket("ws://" + location.hostname + ":8000");
 
 	ws.onmessage = function (e) {
 		var data = e.data,
@@ -92,7 +95,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		var o = {};
 
 		commands.forEach(function (cmd) {
-			o[cmd] = socket.send.bind(socket, course + '/' + cmd);
+			o[cmd] = socket.send.bind(socket, 'course/' + cmd, course);
 		});
 
 		return o;
@@ -156,7 +159,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 				comment: $scope.comment
 			};
 
-			socket.insert(user);
+			socket.add(user);
 			$scope.queue.push(user);
 		}
 	};
