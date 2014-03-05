@@ -44,13 +44,7 @@ app.get('/api/list', function (req, res) {
 
 app.get('/api/list/:course', function (req, res) {
 	try {
-		respondWithJSON(res, getChannel(req.params.course).map(function (obj) {
-			return {
-				name: 'unknown',
-				action: '?',
-				comment: '<blank>'
-			};
-		}));
+		respondWithJSON(res, getQueue(req.params.course));
 
 	} catch (e) {
 		res.status(404);
@@ -58,68 +52,166 @@ app.get('/api/list/:course', function (req, res) {
 	}
 });
 
+function QueueRoom() {
+	this.listeners = [];
+	this.queue = [];
+}
+
+QueueRoom.prototype = {
+	addListener: function (socket) {
+		this.listeners.push(socket);
+	},
+
+	removeListener: function (socket) {
+		var i = this.listeners.indexOf(socket);
+
+		if (i !== -1) {
+			this.listeners.splice(i, 1);
+		}
+	},
+
+	forListener: function (fn) {
+		this.listeners.forEach(fn);
+	},
+
+	addQueuer: function (user) {
+		this.queue.push(user);
+	},
+
+	removeQueuer: function (username) {
+		this.queue = this.queue.filter(function (user) {
+			return user.name !== username;
+		})
+	},
+
+	forQueuer: function (fn) {
+		this.queue.forEach(fn);
+	}
+};
+
+var queues = {};
+var clientChannel = new Map;
+
+courses.forEach(function (course) {
+	queues[course] = new QueueRoom();
+});
+
 /**
- * Nice encapsulation
+ * @param {string} name
+ * @return {QueueRoom} queue
  */
-var addClientTo, removeClient, chanOf, logChannels, getChannel;
-(function () {
-	var channels = {};
-	var clientChannel = new Map;
+function getRoom(name) {
+	var chan = queues[name];
 
-	courses.forEach(function (course) {
-		channels[course] = [];
-	});
+	if (!chan) {
+		throw new Error('No such course: ' + name + '!');
+	}
 
-	/**
-	 * @param {string} name
-	 * @return {!Array|undefined} queue
-	 */
-	getChannel = function (name) {
-		var chan = channels[name];
+	return chan;
+}
 
-		if (!chan) {
-			throw new Error('No such course: ' + name + '!');
-		}
+/**
+ * @param {string} name
+ * @return {Array} queue
+ */
+function getQueue(name) {
+	return getRoom(name).queue;
+}
 
-		return chan;
-	};
+/**
+ * @param {string} name
+ * @return {Array} queue
+ */
+function getListers(name) {
+	return getRoom(name).listeners;
+}
 
-	/**
-	 * Adds the client to the channel.
-	 * @param {WebSocket} ws
-	 * @param {string} name
-	 */
-	addClientTo = function (ws, name) {
-		var chan = getChannel(name);
+/**
+ * Adds the client to the channel.
+ * @param {WebSocket} ws
+ * @param {string} name
+ */
+function addClientTo(ws, name) {
+	var chan = getQueue(name);
 
-		clientChannel.set(ws, chan);
-		chan.push(ws);
-	};
+	clientChannel.set(ws, chan);
+	chan.push(ws);
+}
 
-	/**
-	 * Removes the client from it's channel.
-	 * @param {WebSocket} ws
-	 */
-	removeClient = function (ws) {
-		var chan = clientChannel.get(ws);
+/**
+ * Removes the client from it's channel.
+ * @param {WebSocket} ws
+ */
+function removeClient(ws) {
+	var rooms = getRoomsOf(ws);
 
-		if (chan) {
-			clientChannel.delete(ws);
-			chan.splice(chan.indexOf(ws), 1);
-		}
-	};
 
-	/**
-	 * @param {WebSocket} ws
-	 */
-	channelOf = function (ws) {
-		return clientChannel.get(ws);
-	};
+}
 
-	logChannels = function () {
-		console.log(channels);
-	};
-})();
+/**
+ * @param {WebSocket} ws
+ */
+function channelOf(ws) {
+	return clientChannel.get(ws);
+}
+
+/** @type {Map.<string, Function>} */
+var commands = new Map();
+
+commands.set("queue/listen", function (course) {
+	try {
+		var room = getRoom(course);
+		room.addListener(this);
+	} catch (e) {
+		console.error(e);
+	}
+});
+
+commands.set("queue/mute", function (course) {
+	try {
+		var room = getRoom(course);
+		room.removeListener(this);
+	} catch (e) {
+		console.error(e);
+	}
+});
+
+commands.set("queue/add", function (course, user) {
+	try {
+		console.log(user.name + " queued up to " +
+			(user.action == 'H' ? 'ask for help' : 'present' ) +
+			' for ' + course);
+
+		var room = getRoom(course);
+		room.addQueuer(user);
+		room.forListener(notify("queue/add", course, user));
+	} catch (e) {
+		console.error(e);
+	}
+});
+
+commands.set("queue/remove", function (course, username) {
+	try {
+		console.log(username + " left the " + course + ' queue.');
+
+		var room = getRoom(course);
+		room.removeQueuer(username);
+		room.forListener(notify("queue/remove", course, username));
+	} catch (e) {
+		console.error(e);
+	}
+});
+
+/**
+ * @param {string} command
+ * @param {...?} data
+ */
+function notify(command) {
+	var data = Array.prototype.slice.call(arguments, 1);
+	return function (socket) {
+		socket.send(command + ":" + JSON.stringify(data));
+	}
+}
 
 /**
  * @param {string} message
@@ -137,34 +229,6 @@ function parseMessage(message) {
 		params: JSON.parse(message.slice(colon+1))
 	};
 }
-
-/** @type {Map.<string, Function>} */
-var commands = new Map();
-
-commands.set("echo", function (x) {
-	this.send("result:" + JSON.stringify([x]));
-});
-
-commands.set("course", function (name) {
-	removeClient(this);
-	addClientTo(this, name);
-	this.send("result:[\"joined course list " + name + "\"]");
-	logChannels();
-});
-
-commands.set("help", function (msg) {
-	channelOf(this).forEach(function (socket) {
-		if (socket === this) return;
-
-		socket.send("help:" + JSON.stringify([msg]));
-	}, this);
-});
-
-commands.set("course/add", function (course, user) {
-	console.log(user.name + " queued up to " +
-		(user.action == 'H' ? 'ask for help' : 'present' ) +
-		' for ' + course);
-});
 
 /**
  * @param {WebSocket} ws

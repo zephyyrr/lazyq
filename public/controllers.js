@@ -75,11 +75,22 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 			cmd = data.split(":", 1)[0],
 			params = JSON.parse(data.slice(cmd.length + 1));
 
+		console.log(cmd, params);
+
 		if (handlers[cmd]) {
 			handlers[cmd].forEach(function (callback) {
 				callback.apply(null, params);
 			});
 		}
+	};
+
+	var queue = [];
+
+	ws.onopen = function () {
+		queue.forEach(function (data) {
+			ws.send(data);
+		});
+		queue = null;
 	};
 
 	return {
@@ -88,8 +99,16 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		 * @param {...?} data
 		 */
 		send: function (type) {
-			ws.send(type + ":" +
-				angular.toJson(Array.prototype.slice.call(arguments, 1)));
+			var data = type + ":" +
+				angular.toJson(Array.prototype.slice.call(arguments, 1));
+
+			if (ws.readyState === 0) {
+				queue.push(data)
+			} else if (ws.readyState === 1) {
+				ws.send(data);
+			} else {
+				console.error("Closed socket!");
+			}
 		},
 
 		on: function (type, callback) {
@@ -98,6 +117,13 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 			}
 
 			handlers[type].push(callback);
+
+			console.log(handlers);
+		},
+
+		off: function (type, callback) {
+			var h = handlers[type];
+			h.splice(h.indexOf(callback), 1);
 		}
 	};
 })
@@ -113,13 +139,16 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		var o = {};
 
 		commands.forEach(function (cmd) {
-			o[cmd] = socket.send.bind(socket, 'course/' + cmd, course);
+			o[cmd] = socket.send.bind(socket, 'queue/' + cmd, course);
 		});
 
 		return o;
 	}
 
 	return {
+		subscribers: null,
+		course: null,
+
 		/**
 		 * Subscribes to a course, and gets notified of changes to
 		 * the course's queue through it's callback.
@@ -129,19 +158,29 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 		 * @param {Function} remove
 		 */
 		subscribeTo: function (course, insert, remove) {
-			var args = Array.prototype.slice.call(arguments, 1);
+			var s = this.subscribers = Array.prototype.slice.call(arguments, 1);
 
-			commands.forEach(function (command, i) {
-				if (args[i]) {
-					socket.on('course/' + command, args[i]);
-				}
-			});
+			this.course = course;
+
+			s && s.forEach(function (fn, i) {
+				socket.on('queue/' + commands[i], fn);
+			}, this);
+
+			socket.send('queue/listen', course);
 
 			return makeCommands(course);
 		},
 
 		forCourse: function (name) {
 			return $http.get('/api/list/' + name);
+		},
+
+		unsubscribe: function () {
+			this.subscribers.forEach(function (fn, i) {
+				socket.off('queue/' + commands[i], fn);
+			});
+
+			this.course && socket.send('queue/mute', this.course);
 		}
 	}
 }])
@@ -156,10 +195,14 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	$scope.action = "H";
 
 	var socket = Queue.subscribeTo(params.course,
-		function insert(user) {
-			$scope.queue.push(user);
+		function insert(course, user) {
+			console.log(course, user);
+			$scope.$apply(function () {
+				$scope.queue.push(user);
+			});
 		},
-		function remove(user) {
+		function remove(course, username) {
+			console.log(course, username);
 			$scope.queue = $scope.queue.filter(withName(user.name));
 		});
 
@@ -168,6 +211,10 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 			return usr.name === name;
 		};
 	}
+
+	$scope.$on('$locationChangeStart', function () {
+		Queue.unsubscribe();
+	});
 
 	$scope.addToQueue = function () {
 		if (!$scope.queue.some(withName(User.getName()))) {
@@ -178,7 +225,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 			};
 
 			socket.add(user);
-			$scope.queue.push(user);
+			//$scope.queue.push(user);
 		}
 	};
 }])

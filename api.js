@@ -3,7 +3,8 @@ course/list
 course/list name
 course/unlist name
 
-course/update name, {user, time, help/present, comment}
-course/add		name, {user, time, help/present, comment}
-course/remove	name, {user}
+// subscribe
+queue/update	"name", {user, time, help/present, comment}
+queue/add			"name", {user, time, help/present, comment}
+queue/remove	"name", {user}
 
