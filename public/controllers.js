@@ -25,14 +25,10 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	});
 }])
 
-.controller('ListCtrl', ['$scope', 'courses', function ($scope, courses) {
-	$scope.query = ""
-	$scope.$on('searchEvent', function(event, query) {
-		$scope.query = query
-	})
+.controller('ListCtrl', ['$scope', '$http', function ($scope, $http) {
+	$scope.query = "";
 
-	$scope.courses = courses;
-	console.log(User.getName());
+	$scope.courses = $http.get('/list').then(function (d) { return d.data });
 }])
 
 .factory('UserService', function () {
@@ -41,6 +37,7 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	return {
 		setName: function (name) {
 			localStorage.setItem('name', name);
+			username = name;
 		},
 		getName: function () {
 			return username;
@@ -146,13 +143,6 @@ angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
 	$scope.course = 'none';
 	$scope.title = "LazyQ"
 	$scope.num = 1;
-}])
-
-.controller('SearchCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
-	$scope.query = "";
-	$scope.search = function() {
-		$rootScope.$broadcast('searchEvent', $scope.query);
-	};
 }])
 
 .controller('UserCtrl', ['$scope', function ($scope) {
