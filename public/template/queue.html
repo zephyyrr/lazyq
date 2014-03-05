@@ -1,9 +1,15 @@
 <h1>List: {{ course }}</h1>
 <p ng-repeat="user in queue">#{{ $index + 1 }} {{ user.name }} {{ user.action }} {{ user.comment }}</p>
 
-<form ng-submit="addToQueue()">
-	<label>Help: <input type="radio" ng-model="action" value="H"></label>
-	<label>Present: <input type="radio" ng-model="action" value="P"></label>
-	<input type="text" ng-model="comment">
-	<input class="btn btn-default" type="submit" value="Enqueue">
-</form>
+<div class="queueControls">
+	<form ng-hide="queued" ng-submit="joinQueue()">
+		<label>Help: <input type="radio" ng-model="action" value="H"></label>
+		<label>Present: <input type="radio" ng-model="action" value="P"></label>
+		<input type="text" ng-model="comment">
+		<input class="btn btn-default" type="submit" value="Enqueue">
+	</form>
+	
+	<form ng-show="queued" ng-submit="leaveQueue()">
+		<input class="btn btn-default" type="submit" value="Dequeue">
+	</form>
+</div>
