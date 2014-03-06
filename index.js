@@ -16,7 +16,11 @@ var socketExtras = new Map();
 wss.on('connection', function (ws) {
 	console.log("Client connected!");
 
-	socketExtras.set(ws, {listeners: [], queues: []});
+	socketExtras.set(ws, {
+		listeners: [],
+		queues: [],
+		name: null
+	});
 
 	ws.on('message', function (message) {
 		try {
@@ -56,41 +60,58 @@ app.get('/api/list/:course', function (req, res) {
 	}
 });
 
+function fluent(fn) {
+	return function () {
+		fn.apply(this, arguments);
+		return this;
+	}
+}
+
 function QueueRoom() {
 	this.listeners = [];
 	this.queue = [];
 }
 
 QueueRoom.prototype = {
-	addListener: function (socket) {
+	addListener: fluent(function (socket) {
 		this.listeners.push(socket);
-	},
+	}),
 
-	removeListener: function (socket) {
+	removeListener: fluent(function (socket) {
 		var i = this.listeners.indexOf(socket);
 
 		if (i !== -1) {
 			this.listeners.splice(i, 1);
 		}
-	},
+	}),
 
-	forListener: function (fn) {
+	forListener: fluent(function (fn) {
 		this.listeners.forEach(fn);
-	},
+	}),
 
-	addQueuer: function (user) {
+	addUser: fluent(function (user) {
 		this.queue.push(user);
-	},
+	}),
 
-	removeQueuer: function (username) {
+	removeUser: fluent(function (username) {
 		this.queue = this.queue.filter(function (user) {
 			return user.name !== username;
 		})
-	},
+	}),
 
-	forQueuer: function (fn) {
+	forUser: fluent(function (fn) {
 		this.queue.forEach(fn);
-	}
+	}),
+
+	updateUser: fluent(function (name, user) {
+		this.queue.forEach(function (usr, i, queue) {
+			if (usr.name === name) {
+				queue[i] = user;
+			}
+		});
+
+		this.forListener(notify('queue/update', name, user));
+	})
 };
 
 var queues = {};
@@ -175,8 +196,8 @@ var commands = new Map();
 
 commands.set("queue/listen", function (course) {
 	try {
-		var room = getRoom(course);
-		room.addListener(this);
+		socketExtras.get(this).listeners.push(course);
+		getRoom(course).addListener(this);
 	} catch (e) {
 		console.error(e);
 	}
@@ -184,8 +205,9 @@ commands.set("queue/listen", function (course) {
 
 commands.set("queue/mute", function (course) {
 	try {
-		var room = getRoom(course);
-		room.removeListener(this);
+		var l = socketExtras.get(this).listeners;
+		l.slice(l.indexOf(course), 1);
+		getRoom(course).removeListener(this);
 	} catch (e) {
 		console.error(e);
 	}
@@ -193,25 +215,39 @@ commands.set("queue/mute", function (course) {
 
 commands.set("queue/add", function (course, user) {
 	try {
+		// var extra = socketExtras.get(this);
+
+		// if (extra.name !== user.name) {
+		// 	extra.rooms.forEach(function (room) {
+		// 		room.updateUser(extra.name, user);
+		// 	});
+
+		// 	extra.name = user.name;
+		// }
+
 		console.log(user.name + " queued up to " +
 			(user.action == 'H' ? 'ask for help' : 'present' ) +
 			' for ' + course);
 
-		var room = getRoom(course);
-		room.addQueuer(user);
-		room.forListener(notify("queue/add", course, user));
+		getRoom(course)
+			.addUser(user)
+			.forListener(notify("queue/add", course, user));
 	} catch (e) {
 		console.error(e);
 	}
 });
 
+// commands.set("queue/update", function (course, username, user) {
+
+// });
+
 commands.set("queue/remove", function (course, username) {
 	try {
 		console.log(username + " left the " + course + ' queue.');
 
-		var room = getRoom(course);
-		room.removeQueuer(username);
-		room.forListener(notify("queue/remove", course, username));
+		getRoom(course)
+			.removeUser(username)
+			.forListener(notify("queue/remove", course, username));
 	} catch (e) {
 		console.error(e);
 	}

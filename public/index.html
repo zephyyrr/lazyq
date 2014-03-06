@@ -13,7 +13,10 @@
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 	<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.min.js"></script>
 
+	<script src="config.js"></script>
+	<script src="services.js"></script>
 	<script src="controllers.js"></script>
+
 	<link rel="stylesheet" type="text/css" href="styles/index.css">
 
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -24,19 +27,16 @@
     <![endif]-->
 </head>
 <body>
+<nav ng-controller="NavCtrl">
+	<button style="float:left;" ng-show="nav.back" ng-click="back()">
+	  <span class="glyphicon glyphicon-chevron-left"></span>
+	</button>
 
-<!-- This navigation bar was stolen from http://getbootstrap.com/components/#navbar -->
-<!-- Magic makes it work. -->
-<nav class="navbar navbar-default" role="navigation" >
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-		<div class="navbar-header">
-			<a class="navbar-brand" href="#/search" ng-controller="TitleCtrl">{{ title }}</a>
-		</div>
-		<ul class="nav navbar-nav navbar-right">
-			<li><a href="#/logout">Log out</a></li>
-		</ul>
-	</div><!-- /.container-fluid -->
+	<button style="float:right;" ng-show="nav.logout">
+	  <span class="glyphicon glyphicon-log-out"></span>
+	</button>
+
+	<h1>{{ nav.title }}</h1>
 </nav>
 
 <div class="content" ng-view></div>
