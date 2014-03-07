@@ -119,11 +119,11 @@ nav button .glyphicon {
 	border: none;
 }
 
-.table tr:first-child {
+.table.queue tr:first-child {
 	background-color: gray;
 }
 
-.table tr:nth-child(2n) {
+.table.queue tr:nth-child(2n) {
 	background-color: #444;
 }
 

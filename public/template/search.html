@@ -1,10 +1,23 @@
-<div class="text-box">
-	<h2>Search for a course</h2>
+<table class="table container">
+	<thead>
+		<th>Name</th>
+		<th>Queue lengh</th>
+		<th>Open?</th>
+	</thead>
+	<tbody>
+		<tr ng-repeat="c in courses | filter:c.active | filter:query" class="">
+			<th><a href="#/course/{{c.name}}">{{ c.name }}</a></th>
+			<td>X{{ c.size }} people in queue</td>
+			<td>{{ c.open }}</td>
+		</tr>
+	</tbody>
+</table>
+
+<div class="bottomControls">
+	<!--<h2>Search for a course</h2>-->
 	<form ng-submit="join()">
-		<input type="text" typeahead="course for course in courses | filter:$viewValue | limitTo:8"
-			class="form-control" placeholder="Search" ng-model="query" autofocus>
-		<a href="#/list" class="btn btn-default">All courses</a>
-		<input type="submit" class="btn btn-default" value="Search">
+		<input type="text" class="form-control" placeholder="Search for a course" 
+		ng-model="query" autofocus>
 	</form>
 </div>
 

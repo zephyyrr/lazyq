@@ -1,2 +1,6 @@
-<h1>Courses</h1>
-<p ng-repeat="c in courses | filter:query"><a href="#/course/{{c}}">{{ c }}</a></p>
+<div class="text-box panel"
+	<h1>Courses</h1>
+	<p class="course-list" ng-repeat="c in courses | filter:query">
+		<a href="#/course/{{c}}">{{ c }}</a>
+	</p>
+</div>
