@@ -44,7 +44,9 @@ function respondWithJSON(res, data) {
   res.end(JSON.stringify(data));
 }
 
-var courses = ['inda', 'tilda', 'numme'];
+var courses = ['inda', 'tilda', 'numme'].map(function (name) {
+	return {name: name, size: 0, open: false};
+});
 
 app.get('/api/list', function (req, res) {
 	respondWithJSON(res, courses)
@@ -118,7 +120,7 @@ var queues = {};
 var clientChannel = new Map;
 
 courses.forEach(function (course) {
-	queues[course] = new QueueRoom();
+	queues[course.name] = new QueueRoom();
 });
 
 /**

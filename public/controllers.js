@@ -53,21 +53,27 @@ function ($scope, params, User, Queue, Nav) {
 
 	Queue.forCourse(params.course).then(function (res) {
 		$scope.queue = res.data;
-		$scope.queued = res.data.some(withName(User.getName()));
+		$scope.queued = isQueuing();
 	});
 
 	// Default action is "help"
 	$scope.action = "H";
 
+	function isQueuing() {
+		return $scope.queue.some(withName(User.getName()));
+	}
+
 	var socket = Queue.subscribeTo(params.course,
 		function insert(course, user) {
 			$scope.$apply(function () {
 				$scope.queue.push(user);
+				$scope.queued = isQueuing();
 			});
 		},
 		function remove(course, username) {
 			$scope.$apply(function () {
 				$scope.queue = $scope.queue.filter(not(withName(username)));
+				$scope.queued = isQueuing();
 			});
 		});
 
@@ -91,14 +97,12 @@ function ($scope, params, User, Queue, Nav) {
 			};
 
 			socket.add(user);
-			$scope.queued = true;
 			$scope.comment = '';
 		}
 	};
 
 	$scope.leaveQueue = function () {
 		socket.remove(User.getName());
-		$scope.queued = false;
 	};
 }])
 
