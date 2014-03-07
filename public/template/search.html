@@ -6,7 +6,7 @@
 	</thead>
 	<tbody>
 		<tr 
-		ng-repeat="c in courses | filter:{active: true} | filter:{name: query}">
+		ng-repeat="c in courses | ifactive:user.admin | filter:{name: query}">
 			<th><a href="#/course/{{c.name}}">{{ c.name }}</a></th>
 			<td>{{ c.size }} people in queue</td>
 			<td>{{ c.open }}</td>

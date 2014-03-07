@@ -21,6 +21,8 @@ function ($scope, $location, courses) {
 			$scope.error = "No such course: " + $scope.query;
 		}
 	};
+	
+	$scope.user = {admin: true}
 }])
 
 .controller('ListCtrl',
