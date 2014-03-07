@@ -13,6 +13,10 @@ angular.module('LazyQ')
 			return username;
 		},
 
+		isAdmin: function () {
+			return true;
+		},
+
 		clearName: function () {
 			localStorage.removeItem('name');
 			username = void 0;

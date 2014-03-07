@@ -1,57 +1,123 @@
+
+/**
+ * Get express, make an app and serve static
+ * files on port 8080.
+ */
 var express = require('express');
-
 var app = express();
-
-//app.use('/media', express.static(__dirname + '/media'));
 app.use(express.static(__dirname + '/public'));
-
 app.listen(8080);
 
+/**
+ * Create a new WebSocket server.
+ */
 var WebSocketServer = require("ws").Server;
-
 var wss = new WebSocketServer({port: 8000});
-
 var socketExtras = new Map();
 
+/**
+ * Websocket handling.
+ */
 wss.on('connection', function (ws) {
 	console.log("Client connected!");
 
+	/**
+	 * Every socket has a set of extras.
+	 * The purpose of these is to handle removal of
+	 * the socket once it is disconnected.
+	 */
 	socketExtras.set(ws, {
 		listeners: [],
 		queues: [],
 		name: null
 	});
 
+	/**
+	 * Messages are parsed and commands are executed.
+	 * Errors are sent back to the client.
+	 */
 	ws.on('message', function (message) {
 		try {
-			commandFrom(ws, parseMessage(message));
+			executeCommandFrom(ws, parseMessage(message));
 		} catch (e) {
 			if (e instanceof Error) {
-				e = JSON.stringify([e.message]);
+				e = JSON.stringify([e.name, e.message]);
 			}
 			ws.send("error:" + e);
 		}
 	});
 
+	/**
+	 * When a connection is closed,
+	 * the socket is thoroughly removed.
+	 */
 	ws.on('close', function () {
 		console.log("Client disconnected!");
 		removeClient(ws);
 	});
 });
 
+/**
+ * @param {string} message
+ * @return {{type: string, params: Array}}
+ */
+function parseMessage(message) {
+	var colon = message.indexOf(":");
+
+	if (colon === -1) {
+		throw JSON.stringify(["Invalid format! Should be, command:JSON"]);
+	}
+
+	return {
+		type: message.slice(0, colon),
+		params: JSON.parse(message.slice(colon+1))
+	};
+}
+
+/**
+ * @param {WebSocket} ws
+ * @param {{type: string, params: Array}} command
+ */
+function executeCommandFrom(ws, command) {
+	/** @type {Function} */
+	var cmd = commands.get(command.type);
+
+	if (cmd) {
+		cmd.apply(ws, command.params);
+	} else {
+		throw new Error("No such command: " + command.type);
+	}
+}
+
 function respondWithJSON(res, data) {
 	res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(data));
 }
 
+/**
+ * TODO: database
+ * Initial course representation.
+ */
 var courses = ['inda', 'tilda', 'numme'].map(function (name) {
-	return {name: name, size: 0, open: false, active: true};
+	return {
+		name: name,
+		size: 0,
+		open: true,
+		active: true
+	};
 });
 
+/**
+ * Sends the list of courses to the client.
+ */
 app.get('/api/list', function (req, res) {
 	respondWithJSON(res, courses)
 });
 
+/**
+ * Sends the queue of a given course to the client.
+ * 404 if no such course.
+ */
 app.get('/api/list/:course', function (req, res) {
 	try {
 		respondWithJSON(res, getQueue(req.params.course));
@@ -62,6 +128,12 @@ app.get('/api/list/:course', function (req, res) {
 	}
 });
 
+/**
+ * A flunent function returns this.
+ *
+ * @param {Function} fn
+ * @return {Function}
+ */
 function fluent(fn) {
 	return function () {
 		fn.apply(this, arguments);
@@ -69,6 +141,11 @@ function fluent(fn) {
 	}
 }
 
+/**
+ * A QueueRoom consists of a number
+ * of queuing students and connections
+ * interested in updates to the queue.
+ */
 function QueueRoom() {
 	this.listeners = [];
 	this.queue = [];
@@ -98,7 +175,7 @@ QueueRoom.prototype = {
 	removeUser: fluent(function (username) {
 		this.queue = this.queue.filter(function (user) {
 			return user.name !== username;
-		})
+		});
 	}),
 
 	forUser: fluent(function (fn) {
@@ -116,9 +193,10 @@ QueueRoom.prototype = {
 	})
 };
 
+/**
+ * The current list of queues.
+ */
 var queues = {};
-var clientChannel = new Map;
-
 courses.forEach(function (course) {
 	queues[course.name] = new QueueRoom();
 });
@@ -154,18 +232,6 @@ function getListers(name) {
 }
 
 /**
- * Adds the client to the channel.
- * @param {WebSocket} ws
- * @param {string} name
- */
-function addClientTo(ws, name) {
-	var chan = getQueue(name);
-
-	clientChannel.set(ws, chan);
-	chan.push(ws);
-}
-
-/**
  * Removes the client from it's channel.
  * @param {WebSocket} socket
  */
@@ -187,13 +253,10 @@ function removeClient(socket) {
 }
 
 /**
- * @param {WebSocket} ws
+ * commands, maps a command string to a function to execute.
+ *
+ * @type {Map.<string, Function>}
  */
-function channelOf(ws) {
-	return clientChannel.get(ws);
-}
-
-/** @type {Map.<string, Function>} */
 var commands = new Map();
 
 commands.set("queue/listen", function (course) {
@@ -239,10 +302,6 @@ commands.set("queue/add", function (course, user) {
 	}
 });
 
-// commands.set("queue/update", function (course, username, user) {
-
-// });
-
 commands.set("queue/remove", function (course, username) {
 	try {
 		console.log(username + " left the " + course + ' queue.');
@@ -263,37 +322,5 @@ function notify(command) {
 	var data = Array.prototype.slice.call(arguments, 1);
 	return function (socket) {
 		socket.send(command + ":" + JSON.stringify(data));
-	}
-}
-
-/**
- * @param {string} message
- * @return {{type: string, params: Array}}
- */
-function parseMessage(message) {
-	var colon = message.indexOf(":");
-
-	if (colon === -1) {
-		throw JSON.stringify(["Invalid format! Should be, command:JSON"]);
-	}
-
-	return {
-		type: message.slice(0, colon),
-		params: JSON.parse(message.slice(colon+1))
-	};
-}
-
-/**
- * @param {WebSocket} ws
- * @param {{type: string, params: Array}} command
- */
-function commandFrom(ws, command) {
-	/** @type {Function} */
-	var cmd = commands.get(command.type);
-
-	if (cmd) {
-		cmd.apply(ws, command.params);
-	} else {
-		throw new Error("No such command: " + command.type);
 	}
 }

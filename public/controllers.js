@@ -13,8 +13,14 @@ function ($scope, $location, courses) {
 	$scope.courses = courses;
 	$scope.error = "";
 
+	function courseName(query) {
+		return function (course) {
+			return query === course.name;
+		};
+	}
+
 	$scope.join = function() {
-		if ($scope.courses.indexOf($scope.query) !== -1) {
+		if ($scope.courses.some(courseName($scope.query))) {
 			$scope.error = "";
 			$location.path('/course/' + $scope.query);
 		} else {
