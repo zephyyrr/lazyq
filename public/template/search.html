@@ -5,7 +5,8 @@
 		<th>Open?</th>
 	</thead>
 	<tbody>
-		<tr ng-repeat="c in courses | filter:c.active | filter:query" class="">
+		<tr 
+		ng-repeat="c in courses | filter:{active: true} | filter:{name: query}">
 			<th><a href="#/course/{{c.name}}">{{ c.name }}</a></th>
 			<td>{{ c.size }} people in queue</td>
 			<td>{{ c.open }}</td>
