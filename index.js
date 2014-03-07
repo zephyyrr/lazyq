@@ -45,7 +45,7 @@ function respondWithJSON(res, data) {
 }
 
 var courses = ['inda', 'tilda', 'numme'].map(function (name) {
-	return {name: name, size: 0, open: false};
+	return {name: name, size: 0, open: false, active: true};
 });
 
 app.get('/api/list', function (req, res) {
