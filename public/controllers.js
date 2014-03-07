@@ -11,11 +11,15 @@ angular.module('LazyQ')
 function ($scope, $location, courses) {
 	$scope.query = "";
 	$scope.courses = courses;
-	$scope.redirect = function(path) {
-		$location.path(path);
-	};
+	$scope.error = "";
+
 	$scope.join = function() {
-		$scope.redirect('/course/' + $scope.query);
+		if ($scope.courses.indexOf($scope.query) !== -1) {
+			$scope.error = "";
+			$location.path('/course/' + $scope.query);
+		} else {
+			$scope.error = "No such course: " + $scope.query;
+		}
 	};
 }])
 

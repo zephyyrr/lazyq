@@ -27,18 +27,20 @@
     <![endif]-->
 </head>
 <body>
-<nav ng-controller="NavCtrl">
-	<button style="float:left;" ng-show="nav.back" ng-click="back()">
-	  <span class="glyphicon glyphicon-chevron-left"></span>
-	</button>
+<div id="wrapper">
+	<nav ng-controller="NavCtrl">
+		<button style="float:left;" ng-show="nav.back" ng-click="back()">
+		  <span class="glyphicon glyphicon-chevron-left"></span>
+		</button>
 
-	<button style="float:right;" ng-show="nav.logout">
-	  <span class="glyphicon glyphicon-log-out"></span>
-	</button>
+		<button style="float:right;" ng-show="nav.logout" ng-click="logout()">
+		  <span class="glyphicon glyphicon-log-out"></span>
+		</button>
 
-	<h1>{{ nav.title }}</h1>
-</nav>
+		<h1>{{ nav.title }}</h1>
+	</nav>
 
-<div class="content" ng-view></div>
+	<div class="content" ng-view></div>
+</div>
 </body>
 </html>

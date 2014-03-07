@@ -42,42 +42,42 @@ nav button .glyphicon {
 	font-size: 23px;
 }
 
-/*input {
-	color: #000;
-}*/
-
-.content {/*
-	padding-left: 1em;
-	padding-right: 1em;
-*/}
-
-.queueControls {
+.topControls, .bottomControls {
 	position: fixed;
-	bottom: 0;
 	width: 100%;
 	padding: 10px 15px;
 	background-color: #eee;
-	border-top: 1px solid rgb(216, 216, 216);
+	border-color: rgb(216, 216, 216);
 }
 
-.queueControls input[type="text"] {
+.topControls {
+	top: 0;
+	border-bottom: 1px solid;
+}
+
+.bottomControls {
+	bottom: 0;
+	border-top: 1px solid;
+}
+
+.bottomControls input[type="text"] {
 	margin-bottom: 1em;
 }
 
-.queueControls .btn-group {
+.bottomControls .btn-group {
 	width: 65%;
 }
 
-.queueControls .btn-group .btn {
+.bottomControls .btn-group .btn {
 	width: 50%;
 }
 
-.queueControls input[type="submit"] {
+.bottomControls input[type="submit"] {
 	width: 30%;
 	float: right;
 }
 
-.queueControls form .btn-danger {
+.bottomControls form .btn-danger {
 	margin: 0 auto;
 	display: block;
 	float: none;
@@ -126,3 +126,19 @@ nav button .glyphicon {
 .table tr:nth-child(2n) {
 	background-color: #444;
 }
+
+.huge-logo {
+	color: rgb(252, 252, 129);
+	text-shadow: 1px 2px black;
+	margin-top: -1em;
+	font-size: 80px;
+	margin-bottom: 30px;
+}
+
+/*
+@media only screen and (min-width : 1224px) {
+	#wrapper {
+		width: 800px;
+	}
+}
+*/
