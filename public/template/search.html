@@ -7,7 +7,7 @@
 	<tbody>
 		<tr ng-repeat="c in courses | filter:c.active | filter:query" class="">
 			<th><a href="#/course/{{c.name}}">{{ c.name }}</a></th>
-			<td>X{{ c.size }} people in queue</td>
+			<td>{{ c.size }} people in queue</td>
 			<td>{{ c.open }}</td>
 		</tr>
 	</tbody>
