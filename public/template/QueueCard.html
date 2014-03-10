@@ -1,6 +1,15 @@
-<div class="lq-queuecard">
-	<span class="h3">{{ index+1 }}</span><br>
-	{{ user.name }}
-	{{ user.action }}
-	{{ user.comment }}
+<div class="lq-admincard">
+	<button class="btn btn-danger" ng-click="admin.remove($event, index)">
+		<span class="glyphicon glyphicon-trash"></span>
+	</button>
+	<br><br>
+	<button class="btn" ng-class="{'btn-success': !user.enroute, 'btn-warning': user.enroute}" ng-click="admin.accept($event, index)">
+		<span class="glyphicon" ng-class="{'glyphicon-ok': !user.enroute, 'glyphicon-remove': user.enroute}"></span>
+	</button>
+</div>
+<div class="lq-queuecard" ng-class="{enroute: user.enroute}">
+	<div class="name">{{ user.name }}</div>
+	<div class="nr">{{ index+1 }}</div>
+	<div class="comment">{{ user.comment }}</div>
+	<div class="action">{{ user.action }}</div>
 </div>

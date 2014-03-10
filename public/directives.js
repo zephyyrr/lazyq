@@ -5,7 +5,8 @@ angular.module('LazyQ')
 		restrict: 'E',
 		scope: {
 			user: '=',
-			index: '='
+			index: '=',
+			admin: '='
 		},
 		templateUrl: 'template/QueueCard.html'
 	}

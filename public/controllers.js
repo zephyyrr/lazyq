@@ -55,6 +55,8 @@ function ($scope, $location, Nav, User) {
 .controller('QueueCtrl',
 ['$scope', '$routeParams', 'UserService', 'QueueService', 'NavService', 'TitleService',
 function ($scope, params, User, Queue, Nav, Title) {
+	var socket;
+
 	Nav.title = $scope.course = params.course;
 	Nav.logout = true;
 	Nav.back = '/search';
@@ -63,6 +65,27 @@ function ($scope, params, User, Queue, Nav, Title) {
 		$scope.queue = res.data;
 		$scope.queued = isQueuing();
 	});
+
+	$scope.admin = {
+		open: User.admin(function ($event) {
+			$event.target.style.left = '-70px';
+		}),
+
+		close: User.admin(function ($event) {
+			$event.target.style.left = 0;
+		}),
+
+		remove: User.admin(function ($event, i) {
+			socket.remove($scope.queue[i].name);
+		}),
+
+		accept: User.admin(function ($event, i) {
+			var u = $scope.queue[i];
+			socket.update(u.name, {enroute: !u.enroute});
+		})
+	};
+
+	window['scope'] = $scope;
 
 	// Default action is "help"
 	$scope.action = "H";
@@ -83,7 +106,7 @@ function ($scope, params, User, Queue, Nav, Title) {
 		return inQueue;
 	}
 
-	var socket = Queue.subscribeTo(params.course,
+	socket = Queue.subscribeTo(params.course,
 		function insert(course, user) {
 			$scope.$apply(function () {
 				$scope.queue.push(user);
@@ -93,6 +116,16 @@ function ($scope, params, User, Queue, Nav, Title) {
 		function remove(course, username) {
 			$scope.$apply(function () {
 				$scope.queue = $scope.queue.filter(not(withName(username)));
+				$scope.queued = isQueuing();
+			});
+		},
+		function update(course, username, updatedUser) {
+			$scope.$apply(function () {
+				$scope.queue.forEach(function (user, i) {
+					if (user.name === username) {
+						angular.extend($scope.queue[i], updatedUser);
+					}
+				});
 				$scope.queued = isQueuing();
 			});
 		});
