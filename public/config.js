@@ -1,4 +1,4 @@
-angular.module('LazyQ', ['ngRoute', 'ui.bootstrap'])
+angular.module('LazyQ', ['ngTouch', 'ngRoute', 'ui.bootstrap'])
 
 .config(['$routeProvider', '$locationProvider',	function ($route, $location) {
 
