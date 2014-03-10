@@ -11,13 +11,20 @@
 	<link rel="stylesheet" type="text/css" href="/styles/index.css">
 </head>
 <body>
+	<div id="filter">
+	</div>
 	<div class="centered">
 		<h1 class="huge-logo">LazyQ</h1>
-		<a class="btn btn-primary" style="background-color: #1954A6; font-size: 25px; font-family: Open Sans, sans" href="https://login.kth.se/login?service=http%3A%2F%2Fgreen-07.csc.kth.se%3A8080%2F%23%2Fauth">
+		<a id="login-btn" class="btn btn-primary btn-kth" href="">
 			<img src="http://www.kth.se/polopoly_fs/1.77257!/image/logo-main-2013.png" width="40px">
 			Log in
 		</a>
 	</div>
 </div>
+<script>
+var btn = document.getElementById('login-btn');
+
+btn.href = "https://login.kth.se/login?service=" + encodeURIComponent(location.host + "/auth");
+</script>
 </body>
 </html>
