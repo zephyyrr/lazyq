@@ -95,40 +95,6 @@ function respondWithJSON(res, data) {
 }
 
 /**
- * TODO: database
- * Initial course representation.
- */
-var courses = ['inda', 'tilda', 'numme'].map(function (name) {
-	return {
-		name: name,
-		size: 0,
-		open: true,
-		active: true
-	};
-});
-
-/**
- * Sends the list of courses to the client.
- */
-app.get('/api/list', function (req, res) {
-	respondWithJSON(res, courses)
-});
-
-/**
- * Sends the queue of a given course to the client.
- * 404 if no such course.
- */
-app.get('/api/list/:course', function (req, res) {
-	try {
-		respondWithJSON(res, getQueue(req.params.course));
-
-	} catch (e) {
-		res.status(404);
-		return respondWithJSON(res, e.message);
-	}
-});
-
-/**
  * A flunent function returns this.
  *
  * @param {Function} fn
@@ -142,13 +108,62 @@ function fluent(fn) {
 }
 
 /**
+ * @param {T} one
+ * @return {function(T): boolean}
+ */
+function eq(one) {
+	return function (other) {
+		return one === other;
+	}
+}
+
+/**
+ * A set of sockets. Used for listeners.
+ */
+function SocketSet() {
+	this.sockets = [];
+}
+
+SocketSet.prototype = {
+	add: function (socket) {
+		if (!this.has(socket)) {
+			this.sockets.push(socket);
+		}
+	},
+
+	remove: function (socket) {
+		this.sockets = this.sockets.filter(function (s) {
+			return s !== socket;
+		});
+	},
+
+	has: function (socket) {
+		return this.sockets.some(eq(socket));
+	},
+
+	each: function (fn) {
+		this.sockets.forEach(fn);
+	}
+};
+
+/**
  * A QueueRoom consists of a number
  * of queuing students and connections
  * interested in updates to the queue.
  */
-function QueueRoom() {
+function QueueRoom(name) {
+	this.name = name;
 	this.listeners = [];
 	this.queue = [];
+
+	this.toJSON = function () {
+		return {
+			name: this.name,
+			size: this.queue.length,
+			open: true,
+			active: true
+		};
+	};
 }
 
 QueueRoom.prototype = {
@@ -194,11 +209,40 @@ QueueRoom.prototype = {
 };
 
 /**
+ * TODO: database
+ * Initial course representation.
+ */
+var courses = ['inda', 'tilda', 'numme'];
+
+var courseListeners = new SocketSet();
+
+/**
  * The current list of queues.
  */
 var queues = {};
 courses.forEach(function (course) {
-	queues[course.name] = new QueueRoom();
+	queues[course] = new QueueRoom(course);
+});
+
+/**
+ * Sends the list of courses to the client.
+ */
+app.get('/api/list', function (req, res) {
+	respondWithJSON(res, Object.keys(queues).map(getRoom));
+});
+
+/**
+ * Sends the queue of a given course to the client.
+ * 404 if no such course.
+ */
+app.get('/api/list/:course', function (req, res) {
+	try {
+		respondWithJSON(res, getQueue(req.params.course));
+
+	} catch (e) {
+		res.status(404);
+		return respondWithJSON(res, e.message);
+	}
 });
 
 /**
@@ -224,24 +268,12 @@ function getQueue(name) {
 }
 
 /**
- * @param {string} name
- * @return {Array} queue
- */
-function getListers(name) {
-	return getRoom(name).listeners;
-}
-
-/**
  * Removes the client from it's channel.
  * @param {WebSocket} socket
  */
 function removeClient(socket) {
 	try {
 		var extra = socketExtras.get(socket);
-
-		// extra.rooms.forEach(function (room) {
-		// 	getRoom(room).removeListener(socket);
-		// });
 
 		extra.listeners.forEach(function (room) {
 			getRoom(room).removeListener(socket);
@@ -280,16 +312,6 @@ commands.set("queue/mute", function (course) {
 
 commands.set("queue/add", function (course, user) {
 	try {
-		// var extra = socketExtras.get(this);
-
-		// if (extra.name !== user.name) {
-		// 	extra.rooms.forEach(function (room) {
-		// 		room.updateUser(extra.name, user);
-		// 	});
-
-		// 	extra.name = user.name;
-		// }
-
 		console.log(user.name + " queued up to " +
 			(user.action == 'H' ? 'ask for help' : 'present' ) +
 			' for ' + course);
@@ -297,6 +319,8 @@ commands.set("queue/add", function (course, user) {
 		getRoom(course)
 			.addUser(user)
 			.forListener(notify("queue/add", course, user));
+
+		courseListeners.forEach(notify("queue/update", courses));
 	} catch (e) {
 		console.error(e);
 	}
@@ -309,9 +333,19 @@ commands.set("queue/remove", function (course, username) {
 		getRoom(course)
 			.removeUser(username)
 			.forListener(notify("queue/remove", course, username));
+
+		courseListeners.forEach(notify("queue/update", courses));
 	} catch (e) {
 		console.error(e);
 	}
+});
+
+commands.set("courses/listen", function () {
+	courseListeners.add(this);
+});
+
+commands.set("courses/mute", function () {
+	courseListeners.remove(this);
 });
 
 /**
