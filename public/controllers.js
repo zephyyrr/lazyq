@@ -7,8 +7,8 @@ function not(fn) {
 angular.module('LazyQ')
 
 .controller('SearchCtrl',
-['$scope', '$location', 'courses',
-function ($scope, $location, courses) {
+['$scope', '$location', 'UserService', 'courses',
+function ($scope, $location, User, courses) {
 	$scope.query = "";
 	$scope.courses = courses;
 	$scope.error = "";
@@ -28,7 +28,7 @@ function ($scope, $location, courses) {
 		}
 	};
 	
-	$scope.user = {admin: true}
+	$scope.user = User
 }])
 
 .controller('ListCtrl',
@@ -53,13 +53,13 @@ function ($scope, $location, Nav, User) {
 }])
 
 .controller('QueueCtrl',
-['$scope', '$routeParams', 'UserService', 'QueueService', 'NavService',
-function ($scope, params, User, Queue, Nav) {
+['$scope', '$routeParams', 'UserService', 'QueueService', 'NavService', 'TitleService',
+function ($scope, params, User, Queue, Nav, Title) {
 	Nav.title = $scope.course = params.course;
 	Nav.logout = true;
 	Nav.back = '/search';
 
-	Queue.forCourse(params.course).then(function (res) {
+	Queue.forCourse($scope.course).then(function (res) {
 		$scope.queue = res.data;
 		$scope.queued = isQueuing();
 	});
@@ -68,7 +68,19 @@ function ($scope, params, User, Queue, Nav) {
 	$scope.action = "H";
 
 	function isQueuing() {
-		return $scope.queue.some(withName(User.getName()));
+		var inQueue = $scope.queue.some(function (user, i) {
+			if (user.name === User.getName()) {
+				$scope.position = i;
+				Title.set((i + 1) + ' in ' + $scope.course);
+				return true;
+			}
+		});
+		
+		if (!inQueue) {
+			Title.reset();
+		}
+		
+		return inQueue;
 	}
 
 	var socket = Queue.subscribeTo(params.course,
@@ -121,8 +133,6 @@ function ($scope, params, User, Queue, Nav) {
 	};
 }])
 
-.controller('TitleCtrl', ['$scope', function ($scope) {
-	$scope.course = 'none';
-	$scope.title = "LazyQ"
-	$scope.num = 1;
+.controller('TitleCtrl', ['$scope', 'TitleService', function ($scope, Title) {
+	$scope.data = Title.get();
 }]);

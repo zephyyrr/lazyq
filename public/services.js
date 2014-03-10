@@ -146,6 +146,21 @@ angular.module('LazyQ')
 	}
 }])
 
+.factory('TitleService', function() {
+	var data = {title: 'LazyQ'};
+	return {
+		set: function(newTitle) {
+			data.title = newTitle;
+		},
+		get: function() {
+			return data;
+		},
+		reset: function () {
+			data.title = 'LazyQ';
+		}
+	};
+})
+
 .factory('NavService', function () {
 	var nav = {};
 
