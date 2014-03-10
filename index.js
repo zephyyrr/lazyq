@@ -8,6 +8,8 @@ var app = express();
 app.use(express.static(__dirname + '/public'));
 app.listen(8080);
 
+var _ = require('lodash');
+
 /**
  * Create a new WebSocket server.
  */
@@ -104,7 +106,7 @@ function fluent(fn) {
 	return function () {
 		fn.apply(this, arguments);
 		return this;
-	}
+	};
 }
 
 /**
@@ -114,7 +116,13 @@ function fluent(fn) {
 function eq(one) {
 	return function (other) {
 		return one === other;
-	}
+	};
+}
+
+function not(func) {
+	return function () {
+		return !func.apply(this, arguments);
+	};
 }
 
 /**
@@ -132,16 +140,14 @@ SocketSet.prototype = {
 	},
 
 	remove: function (socket) {
-		this.sockets = this.sockets.filter(function (s) {
-			return s !== socket;
-		});
+		this.sockets = this.sockets.filter(not(eq(socket)));
 	},
 
 	has: function (socket) {
 		return this.sockets.some(eq(socket));
 	},
 
-	each: function (fn) {
+	forEach: function (fn) {
 		this.sockets.forEach(fn);
 	}
 };
@@ -200,11 +206,9 @@ QueueRoom.prototype = {
 	updateUser: fluent(function (name, user) {
 		this.queue.forEach(function (usr, i, queue) {
 			if (usr.name === name) {
-				queue[i] = user;
+				_.extend(queue[i], user);
 			}
 		});
-
-		this.forListener(notify('queue/update', name, user));
 	})
 };
 
@@ -321,6 +325,17 @@ commands.set("queue/add", function (course, user) {
 			.forListener(notify("queue/add", course, user));
 
 		courseListeners.forEach(notify("queue/update", courses));
+	} catch (e) {
+		console.error(e);
+	}
+});
+
+commands.set("queue/update", function (course, username, user) {
+	try {
+		console.log(username + " got " + JSON.stringify(user) + " updated.");
+		getRoom(course)
+			.updateUser(username, user)
+			.forListener(notify("queue/update", course, username, user));
 	} catch (e) {
 		console.error(e);
 	}
