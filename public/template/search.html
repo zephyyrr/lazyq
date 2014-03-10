@@ -6,8 +6,8 @@
 	</thead>
 	<tbody>
 		<tr 
-		ng-repeat="c in courses | ifactive:user.admin | filter:{name: query}">
-			<th><a href="#/course/{{c.name}}">{{ c.name }}</a></th>
+		ng-repeat="c in courses | ifactive:user.isAdmin() | filter:{name: query}">
+			<th><a href="#/course/{{c.name}}" ng-show="c.open">{{ c.name }}</a><span style="color:#DDD" ng-hide="c.open">{{ c.name }}</span</th>
 			<td>{{ c.size }} people in queue</td>
 			<td>{{ c.open }}</td>
 		</tr>
