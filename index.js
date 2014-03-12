@@ -344,7 +344,8 @@ commands.set("queue/add", function (course, user) {
 			.addUser(user)
 			.forListener(notify("queue/add", course, user));
 
-		courseListeners.forEach(notify("queue/update", courses));
+		courseListeners.forEach(notify("courses/update", course,
+			{size: getQueue(course).length}));
 	} catch (e) {
 		console.error(e);
 	}
@@ -369,7 +370,8 @@ commands.set("queue/remove", function (course, username) {
 			.removeUser(username)
 			.forListener(notify("queue/remove", course, username));
 
-		courseListeners.forEach(notify("queue/update", courses));
+		courseListeners.forEach(notify("courses/update", course,
+			{size: getQueue(course).length}));
 	} catch (e) {
 		console.error(e);
 	}
