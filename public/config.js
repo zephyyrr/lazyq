@@ -12,15 +12,6 @@ angular.module('LazyQ', ['ngTouch', 'ngRoute', 'ui.bootstrap'])
 			}]
 		}
 	})
-	.when('/list', {
-		templateUrl: 'template/list.html',
-		controller: 'ListCtrl',
-		resolve: {
-			courses: ['$http', '$q', function ($http, $q) {
-				return $http.get('/api/list').then(function (d) { return d.data });
-			}]
-		}
-	})
 	.when('/course/:course', {
 		templateUrl: 'template/queue.html',
 		controller: 'QueueCtrl'

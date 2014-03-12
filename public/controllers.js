@@ -27,14 +27,8 @@ function ($scope, $location, User, courses) {
 			$scope.error = "No such course: " + $scope.query;
 		}
 	};
-	
-	$scope.user = User
-}])
 
-.controller('ListCtrl',
-['$scope', 'courses',
-function ($scope, courses) {
-	$scope.courses = courses;
+	$scope.user = User
 }])
 
 .controller('NavCtrl',
@@ -98,11 +92,11 @@ function ($scope, params, User, Queue, Nav, Title) {
 				return true;
 			}
 		});
-		
+
 		if (!inQueue) {
 			Title.reset();
 		}
-		
+
 		return inQueue;
 	}
 
