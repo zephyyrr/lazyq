@@ -45,11 +45,13 @@ function ($scope, $location, User, Courses) {
 		}
 	};
 
-	$scope.lock = function(course) {
+	$scope.lock = function($event, course) {
+		$event.preventDefault();
 		Courses.update(course.name, {open: !course.open});
 	}
 
-	$scope.activate = function(course) {
+	$scope.activate = function($event, course) {
+		$event.preventDefault();
 		Courses.update(course.name, {active: !course.active});
 	}
 
