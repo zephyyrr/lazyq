@@ -156,6 +156,7 @@ function ($scope, params, User, Queue, Nav, Title) {
 .controller('NameCtrl', ['$scope', 'UserService', '$location', function ($scope, User, $location) {
 	$scope.done = function () {
 		User.setName($scope.name);
+		User.setAdmin($scope.type == 'admin')
 		$location.path('search');
 	};
 }])
