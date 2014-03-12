@@ -5,11 +5,23 @@
 	<lq-card
 		ng-repeat="c in courses | ifactive:user.isAdmin() | filter:{name: query}"
 		course="c">
+		<div ng-show="user.isAdmin()">
+			<button class="btn btn-primary" ng-click="lock(c)">
+				{{c.open | lockText }}
+			</button>
+
+			<button class="btn btn-warning" ng-click="activate(c)" ng-show="c.active">
+				<span class="glyphicon glyphicon-ban-circle"></span>
+				<!--{{c.active | activeText }}-->
+			</button>
+			<button class="btn btn-success" ng-click="activate(c)" ng-hide="c.active">
+				<span class="glyphicon glyphicon-ok-circle"></span>
+			</button>
+		</div>
 	</lq-card>
 </div>
 
 <div class="bottomControls">
-	<!--<h2>Search for a course</h2>-->
 	<form ng-submit="join()">
 		<input type="text" class="form-control" placeholder="Search for a course"
 		ng-model="query" autofocus>

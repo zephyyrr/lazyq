@@ -9,4 +9,16 @@ angular.module('LazyQ')
 			return course.active;
 		});
 	};
+})
+
+.filter('lockText', function() {
+	return function(active) {
+		return (active) ? "Unlock" : "Lock" ;
+	}
+})
+
+.filter('activeText', function() {
+	return function(active) {
+		return (active) ? "Deactivate" : "Activate" ;
+	}
 });
