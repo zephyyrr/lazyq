@@ -27,6 +27,14 @@ function ($scope, $location, User, courses) {
 			$scope.error = "No such course: " + $scope.query;
 		}
 	};
+	
+	$scope.lock = function(course) {
+		course.open = !course.open
+	}
+	
+	$scope.activate = function(course) {
+		course.active = !course.active
+	}
 
 	$scope.user = User
 }])

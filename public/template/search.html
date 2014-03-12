@@ -6,7 +6,8 @@
 	<thead>
 		<th>Course</th>
 		<th>People</th>
-		<th>Open?</th>
+		<th>Status</th>
+		<th ng-show="user.isAdmin()">Control</th>
 	</thead>
 	<tbody>
 		<tr
@@ -14,6 +15,10 @@
 			<th><a href="#/course/{{c.name}}" ng-show="c.open">{{ c.name }}</a><span style="color:#DDD" ng-hide="c.open">{{ c.name }}</span</th>
 			<td>{{ c.size }} <span class="glyphicon glyphicon-user"></span></td>
 			<td ng-bind-html="c.open | lockIcon"></td>
+			<th ng-show="user.isAdmin()">
+				<button class="btn btn-primary" ng-click="lock(c)">{{c.open | lockText }}</button>
+				<button class="btn btn-primary" ng-click="activate(c)">{{c.active | activeText }}</button>
+			</th>
 		</tr>
 	</tbody>
 </table>

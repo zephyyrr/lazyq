@@ -16,6 +16,18 @@ angular.module('LazyQ')
 		if (!bool) {
 			return $sce.trustAsHtml('<span class="glyphicon glyphicon-lock"></span>');
 		}
-		return '';
+		return $sce.trustAsHtml('<span class="glyphicon glyphicon-unlock"></span>');
 	};
-}]);
+}])
+
+.filter('lockText', function() {
+	return function(active) {
+		return (active) ? "Unlock" : "Lock" ;
+	}
+})
+
+.filter('activeText', function() {
+	return function(active) {
+		return (active) ? "Deactivate" : "Activate" ;
+	}
+});
