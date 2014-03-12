@@ -1,15 +1,15 @@
 <table class="table container">
 	<thead>
-		<th>Name</th>
-		<th>Queue lengh</th>
+		<th>Course</th>
+		<th>People</th>
 		<th>Open?</th>
 	</thead>
 	<tbody>
-		<tr 
+		<tr
 		ng-repeat="c in courses | ifactive:user.isAdmin() | filter:{name: query}">
 			<th><a href="#/course/{{c.name}}" ng-show="c.open">{{ c.name }}</a><span style="color:#DDD" ng-hide="c.open">{{ c.name }}</span</th>
-			<td>{{ c.size }} people in queue</td>
-			<td>{{ c.open }}</td>
+			<td>{{ c.size }} <span class="glyphicon glyphicon-user"></span></td>
+			<td ng-bind-html="c.open | lockIcon"></td>
 		</tr>
 	</tbody>
 </table>
@@ -17,7 +17,7 @@
 <div class="bottomControls">
 	<!--<h2>Search for a course</h2>-->
 	<form ng-submit="join()">
-		<input type="text" class="form-control" placeholder="Search for a course" 
+		<input type="text" class="form-control" placeholder="Search for a course"
 		ng-model="query" autofocus>
 	</form>
 </div>
