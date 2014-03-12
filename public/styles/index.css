@@ -12,6 +12,10 @@ h1, h2 {
 }
 
 nav {
+	position: fixed;
+	top: 0;
+	z-index: 100;
+	box-shadow: 0 5px 20px #333;
 	background-color: #eee;
 	color: #333;
 	display: block;
@@ -43,6 +47,10 @@ nav button .glyphicon {
 	font-size: 23px;
 }
 
+.content {
+	margin-top:	5em;
+}
+
 #filter {
 	background-image: url(http://www.swankydesign.com/images/Material%20Finishes/BRUSHED-STAINLESS-CMYK.jpg);
 	width: 100%;
@@ -68,6 +76,7 @@ nav button .glyphicon {
 .bottomControls {
 	bottom: 0;
 	border-top: 2px solid;
+	box-shadow: 0 -5px 20px #333;
 	background-color: #eee;
 	border-color: rgb(216, 216, 216);
 }
@@ -150,14 +159,14 @@ nav button .glyphicon {
 }
 
 .btn-kth {
-	background-color: #1954A6; 
-	font-size: 25px; 
+	background-color: #1954A6;
+	font-size: 25px;
 	font-family: Open Sans, sans;
 }
 
 .btn-kth:hover {
-	background-color: #1954A6; 
-	-webkit-filter: brightness(2.1); 
+	background-color: #1954A6;
+	-webkit-filter: brightness(2.1);
 	filter: brightness(1.1);
 }
 
@@ -234,6 +243,10 @@ nav button .glyphicon {
   background: red;
   color: white;
   border-radius: 50%;
+}
+
+.card-space {
+	margin-bottom: 8em;
 }
 
 .enroute {
