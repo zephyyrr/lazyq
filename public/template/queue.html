@@ -6,14 +6,16 @@
 		<td>{{ user.comment }}</td>
 	</tr>
 </table>-->
-<lq-queuecard
-	ng-repeat="user in queue"
-	index="$index"
-	user="user"
-	admin="admin"
-	ng-swipe-left="admin.open($event)"
-	ng-swipe-right="admin.close($event)">
-</lq-queuecard>
+<div class="card-space">
+	<lq-queuecard
+		ng-repeat="user in queue"
+		index="$index"
+		user="user"
+		admin="admin"
+		ng-swipe-left="admin.open($event)"
+		ng-swipe-right="admin.close($event)">
+	</lq-queuecard>
+</div>
 
 <div class="bottomControls">
 	<form ng-hide="queued" ng-submit="joinQueue()">
