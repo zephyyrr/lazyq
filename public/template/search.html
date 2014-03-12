@@ -6,15 +6,15 @@
 		ng-repeat="c in courses | ifactive:user.isAdmin() | filter:{name: query}"
 		course="c">
 		<div ng-show="user.isAdmin()">
-			<button class="btn btn-primary" ng-click="lock(c); $event.preventDefault();"">
+			<button class="btn btn-primary" ng-click="lock($event, c);"">
 				{{c.open | lockText }}
 			</button>
 
-			<button class="btn btn-warning" ng-click="activate(c); $event.preventDefault();" ng-show="c.active">
+			<button class="btn btn-warning" ng-click="activate($event, c);" ng-show="c.active">
 				<span class="glyphicon glyphicon-ban-circle"></span>
 				<!--{{c.active | activeText }}-->
 			</button>
-			<button class="btn btn-success" ng-click="activate(c); $event.preventDefault();" ng-hide="c.active">
+			<button class="btn btn-success" ng-click="activate($event, c);" ng-hide="c.active">
 				<span class="glyphicon glyphicon-ok-circle"></span>
 			</button>
 		</div>

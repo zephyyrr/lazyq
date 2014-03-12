@@ -28,11 +28,13 @@ function ($scope, $location, User, courses) {
 		}
 	};
 	
-	$scope.lock = function(course) {
+	$scope.lock = function($event, course) {
+		$event.preventDefault();
 		course.open = !course.open
 	}
 	
-	$scope.activate = function(course) {
+	$scope.activate = function($event, course) {
+		$event.preventDefault();
 		course.active = !course.active
 	}
 
