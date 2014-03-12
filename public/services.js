@@ -18,6 +18,10 @@ angular.module('LazyQ')
 			return admin;
 		},
 
+		setAdmin: function (bool) {
+			admin = bool;
+		},
+
 		/**
 		 * Function decorator.
 		 * Requires the user to be admin to run the functions.
