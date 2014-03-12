@@ -1,0 +1,28 @@
+// JSON APIs
+api/list -> [Course]
+api/list/:course -> [User]
+
+// websocket APIs
+courses/listen
+courses/mute
+
+queue/listen	"name"
+queue/mute		"name"
+queue/add			"name", User
+queue/update	"name", username, User
+queue/remove	"name", username
+
+// DataTypes
+User : {
+	user: string,
+	time: integer,
+	help/present: string,
+	comment: string
+}
+
+Course : {
+	name: string,
+	size: integer,
+	open: bool,
+	active: bool
+}
