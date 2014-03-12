@@ -1,22 +1,12 @@
-<div class="alert alert-warning" ng-show="error &amp;&amp; query">
-	<b>Error:</b> {{ error }}
+<div class="card-space">
+	<div class="alert alert-warning" ng-show="error &amp;&amp; query">
+		<b>Error:</b> {{ error }}
+	</div>
+	<lq-card
+		ng-repeat="c in courses | ifactive:user.isAdmin() | filter:{name: query}"
+		course="c">
+	</lq-card>
 </div>
-
-<table class="table container">
-	<thead>
-		<th>Course</th>
-		<th>People</th>
-		<th>Open?</th>
-	</thead>
-	<tbody>
-		<tr
-		ng-repeat="c in courses | ifactive:user.isAdmin() | filter:{name: query}">
-			<th><a href="#/course/{{c.name}}" ng-show="c.open">{{ c.name }}</a><span style="color:#DDD" ng-hide="c.open">{{ c.name }}</span</th>
-			<td>{{ c.size }} <span class="glyphicon glyphicon-user"></span></td>
-			<td ng-bind-html="c.open | lockIcon"></td>
-		</tr>
-	</tbody>
-</table>
 
 <div class="bottomControls">
 	<!--<h2>Search for a course</h2>-->
