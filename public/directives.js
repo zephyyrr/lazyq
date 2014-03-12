@@ -3,6 +3,7 @@ angular.module('LazyQ')
 .directive('lqCard', function() {
 	return {
 		restrict: 'E',
+		transclude: true,
 		scope: {
 			course: '=',
 		},

@@ -182,6 +182,11 @@ nav button .glyphicon {
 	box-shadow: 0 3px 0 #ccc, 0 0 20px #333;
 }
 
+.lq-card {
+	line-height: 35px;
+	font-size: 20px;
+}
+
 .lq-queuecard {
 	transition: left 0.3s;
 	-webkit-transition: left 0.3s;
