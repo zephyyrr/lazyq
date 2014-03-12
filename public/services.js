@@ -2,6 +2,7 @@ angular.module('LazyQ')
 
 .factory('UserService', function () {
 	var username = localStorage.getItem('name') || void 0;
+	var admin = true;
 
 	return {
 		setName: function (name) {
@@ -14,7 +15,19 @@ angular.module('LazyQ')
 		},
 
 		isAdmin: function () {
-			return true;
+			return admin;
+		},
+
+		/**
+		 * Function decorator.
+		 * Requires the user to be admin to run the functions.
+		 */
+		admin: function (func) {
+			return function () {
+				if (admin) {
+					return func.apply(this, arguments);
+				}
+			};
 		},
 
 		clearName: function () {
@@ -26,7 +39,7 @@ angular.module('LazyQ')
 
 .factory('WebSocketService', function () {
 	var handlers = {
-		'error': [function (d) { console.error("ServerError: " + d); }]
+		'error': [function () { console.error("ServerError: ", arguments); }]
 	};
 
 	var ws = new WebSocket("ws://" + location.hostname + ":8000");
@@ -78,8 +91,6 @@ angular.module('LazyQ')
 			}
 
 			handlers[type].push(callback);
-
-			console.log(handlers);
 		},
 
 		off: function (type, callback) {
@@ -94,7 +105,7 @@ angular.module('LazyQ')
  */
 .factory('QueueService', ['$http', 'WebSocketService', function ($http, socket) {
 	//socket
-	var commands = ['add', 'remove'];
+	var commands = ['add', 'remove', 'update'];
 
 	function makeCommands(course) {
 		var o = {};
