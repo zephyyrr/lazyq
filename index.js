@@ -161,18 +161,36 @@ function QueueRoom(name) {
 	this.name = name;
 	this.listeners = [];
 	this.queue = [];
+	this.open = true;
+	this.active = true;
 
 	this.toJSON = function () {
 		return {
 			name: this.name,
 			size: this.queue.length,
-			open: true,
-			active: true
+			open: this.open,
+			active: this.active
 		};
 	};
 }
 
 QueueRoom.prototype = {
+	updateWith: fluent(function (data) {
+		if (typeof data.name === 'string' && this.name !== data.name) {
+			queues[this.name] = undefined;
+			queues[data.name] = this;
+			this.name = data.name;
+		}
+
+		if (typeof data.open === 'boolean') {
+			this.open = data.open;
+		}
+
+		if (typeof data.active === 'boolean') {
+			this.active = data.active;
+		}
+	}),
+
 	addListener: fluent(function (socket) {
 		this.listeners.push(socket);
 	}),
@@ -283,6 +301,8 @@ function removeClient(socket) {
 			getRoom(room).removeListener(socket);
 		});
 
+		courseListeners.remove(socket);
+
 	} catch (e) {
 		console.error(e);
 	}
@@ -357,6 +377,19 @@ commands.set("queue/remove", function (course, username) {
 
 commands.set("courses/listen", function () {
 	courseListeners.add(this);
+});
+
+commands.set("courses/update", function (courseName, course) {
+	try {
+		console.log(courseName + " got " + JSON.stringify(course) + " updated.");
+
+		getRoom(courseName)
+			.updateWith(course);
+
+		courseListeners.forEach(notify("courses/update", courseName, course));
+	} catch (e) {
+		console.error(e);
+	}
 });
 
 commands.set("courses/mute", function () {

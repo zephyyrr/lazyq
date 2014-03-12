@@ -7,10 +7,27 @@ function not(fn) {
 angular.module('LazyQ')
 
 .controller('SearchCtrl',
-['$scope', '$location', 'UserService', 'courses',
-function ($scope, $location, User, courses) {
+['$scope', '$location', 'UserService', 'CourseService',
+function ($scope, $location, User, Courses) {
 	$scope.query = "";
-	$scope.courses = courses;
+	$scope.user = User;
+
+	$scope.courses = [];
+
+	Courses.list().then(function (res) {
+		$scope.courses = res.data;
+	});
+
+	Courses.onUpdate(function (courseName, updatedCourse) {
+		$scope.$apply(function () {
+			$scope.courses.forEach(function (course, i) {
+				if (course.name === courseName) {
+					angular.extend($scope.courses[i], updatedCourse);
+				}
+			});
+		});
+	});
+
 	$scope.error = "";
 
 	function courseName(query) {
@@ -27,16 +44,18 @@ function ($scope, $location, User, courses) {
 			$scope.error = "No such course: " + $scope.query;
 		}
 	};
-	
+
 	$scope.lock = function(course) {
-		course.open = !course.open
-	}
-	
-	$scope.activate = function(course) {
-		course.active = !course.active
+		Courses.update(course.name, {open: !course.open});
 	}
 
-	$scope.user = User
+	$scope.activate = function(course) {
+		Courses.update(course.name, {active: !course.active});
+	}
+
+	$scope.$on('$locationChangeStart', function () {
+		Courses.offUpdate();
+	});
 }])
 
 .controller('NavCtrl',

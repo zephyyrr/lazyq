@@ -12,13 +12,13 @@ angular.module('LazyQ')
 })
 
 .filter('lockText', function() {
-	return function(active) {
-		return (active) ? "Unlock" : "Lock" ;
+	return function(open) {
+		return (open) ? "Lock" : "Unlock";
 	}
 })
 
 .filter('activeText', function() {
 	return function(active) {
-		return (active) ? "Deactivate" : "Activate" ;
+		return (active) ? "Deactivate" : "Activate";
 	}
 });
