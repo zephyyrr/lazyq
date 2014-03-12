@@ -2,6 +2,9 @@
 	<div class="lq-card">
 		<div style="display: inline-block; width: 14px; height: 14px;"></div>
 		{{ course.name }}
+
+		<div style="float:right" ng-transclude></div>
+
 		<div style="display: inline-block; float: right;">
 			{{ course.size }} <span class="glyphicon glyphicon-user"></span>
 		</div>
@@ -10,4 +13,10 @@
 <div class="lq-card" style="color:#999" ng-hide="course.open">
 	<span class="glyphicon glyphicon-lock"></span>
 	{{ course.name }}
+
+	<div style="float:right" ng-transclude></div>
+
+	<div style="display: inline-block; float: right;">
+		{{ course.size }} <span class="glyphicon glyphicon-user"></span>
+	</div>
 </div>
