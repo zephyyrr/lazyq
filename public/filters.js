@@ -9,13 +9,4 @@ angular.module('LazyQ')
 			return course.active;
 		});
 	};
-})
-
-.filter('lockIcon', ['$sce', function ($sce) {
-	return function (bool) {
-		if (!bool) {
-			return $sce.trustAsHtml('<span class="glyphicon glyphicon-lock"></span>');
-		}
-		return '';
-	};
-}]);
+});
