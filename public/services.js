@@ -2,7 +2,7 @@ angular.module('LazyQ')
 
 .factory('UserService', function () {
 	var username = localStorage.getItem('name') || void 0;
-	var admin = true;
+	var admin = false;
 
 	return {
 		setName: function (name) {
