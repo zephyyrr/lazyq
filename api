@@ -14,9 +14,9 @@ queue/remove	"name", username
 
 // DataTypes
 User : {
-	user: string,
+	name: string,
 	time: integer,
-	help/present: string,
+	action: string,
 	comment: string
 }
 

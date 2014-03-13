@@ -2,7 +2,7 @@ angular.module('LazyQ')
 
 .factory('UserService', function () {
 	var username = localStorage.getItem('name') || void 0;
-	var admin = true;
+	var admin = false;
 
 	return {
 		setName: function (name) {
@@ -105,7 +105,7 @@ angular.module('LazyQ')
 })
 
 /**
- * The SocketService represents the websocket connection to the server.
+ * The QueueService handles queue related stuff.
  */
 .factory('QueueService', ['$http', 'WebSocketService', function ($http, socket) {
 	//socket
@@ -157,6 +157,41 @@ angular.module('LazyQ')
 			});
 
 			this.course && socket.send('queue/mute', this.course);
+		}
+	}
+}])
+
+/**
+ * The CourseService handles course related stuff.
+ */
+.factory('CourseService', ['$http', 'WebSocketService', function ($http, socket) {
+	return {
+		subscriber: [],
+
+		/**
+		 * Subscribes to a course, and gets notified of changes to
+		 * the course's queue through it's callback.
+		 *
+		 * @param {Function} cb
+		 */
+		onUpdate: function (cb) {
+			socket.on('courses/update', this.subscriber = cb);
+
+			socket.send('courses/listen');
+		},
+
+		list: function () {
+			return $http.get('/api/list/');
+		},
+
+		offUpdate: function () {
+			socket.off('courses/update', this.subscriber);
+
+			socket.send('courses/mute');
+		},
+
+		update: function (name, data) {
+			socket.send('courses/update', name, data);
 		}
 	}
 }])

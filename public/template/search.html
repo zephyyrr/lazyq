@@ -6,7 +6,7 @@
 		ng-repeat="c in courses | ifactive:user.isAdmin() | filter:{name: query}"
 		course="c">
 		<div ng-show="user.isAdmin()">
-			<button class="btn btn-primary" ng-click="lock($event, c);"">
+			<button class="btn btn-primary" ng-click="lock($event, c);">
 				{{c.open | lockText }}
 			</button>
 
