@@ -159,7 +159,7 @@ SocketSet.prototype = {
  */
 function QueueRoom(name) {
 	this.name = name;
-	this.listeners = [];
+	this.listeners = new SocketSet();
 	this.queue = [];
 	this.open = true;
 	this.active = true;
@@ -192,15 +192,11 @@ QueueRoom.prototype = {
 	}),
 
 	addListener: fluent(function (socket) {
-		this.listeners.push(socket);
+		this.listeners.add(socket);
 	}),
 
 	removeListener: fluent(function (socket) {
-		var i = this.listeners.indexOf(socket);
-
-		if (i !== -1) {
-			this.listeners.splice(i, 1);
-		}
+		this.listeners.remove(socket);
 	}),
 
 	forListener: fluent(function (fn) {
