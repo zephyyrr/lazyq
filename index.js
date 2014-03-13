@@ -3,140 +3,128 @@
  * Get express, make an app and serve static
  * files on port 8080.
  */
-var express = require('express');
+var express					= require('express');
+var _								= require('lodash');
+var mongoose				= require('mongoose');
+var WebSocketServer = require("ws").Server;
+
+var structs = require('./DataStructures.js');
+var SocketSet = structs.SocketSet;
+var QueueRoom = structs.QueueRoom;
+
+var util = require('./util.js');
+var not = util.not;
+var eq = util.eq;
+var fluent = util.fluent;
+var saving = util.saving;
+
 var app = express();
 app.use(express.static(__dirname + '/public'));
 app.listen(8080);
 
-var _ = require('lodash');
 
+/**
+ * Establish a connection to MongoDB
+ */
+// mongoose.connect('mongodb://localhost/test');
 
+// var db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', function callback () {
+//   // yay!
+// });
 
-
-
-
-
-
-
-
-
-
-
-
-
-var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-mongoose.connect('mongodb://localhost/test');
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function callback () {
-  // yay!
+
+var userSchema = new Schema({
+	name: String,
+	time: { type: Number, default: Date.now },
+	action: String,
+	comment: { type: String, default: '' }
 });
 
+userSchema.methods.toJSON = function () {
+	return {
+		name: this.name,
+		time: this.time,
+		action: this.action,
+		comment: this.comment
+	};
+};
 
+var User = mongoose.model("User", userSchema);
 
+var courseSchema = new Schema({
+	name: String,
+	open: { type: Boolean, default: true },
+	active: { type: Boolean, default: true },
+	queue : [userSchema]
+});
+
+courseSchema.methods.addUser = fluent(saving(function (user) {
+		this.queue.push(user);
+}));
+
+courseSchema.methods.removeUser = fluent(saving(function (username) {
+	this.queue = this.queue.filter(function (user) {
+		return user.name !== username;
+	});
+}));
+
+courseSchema.methods.forUser = fluent(saving(function (fn) {
+	this.queue.forEach(fn);
+}));
+
+courseSchema.methods.updateUser = fluent(saving(function (name, user) {
+	this.queue.forEach(function (usr, i, queue) {
+		if (usr.name === name) {
+			_.extend(queue[i], user);
+		}
+	});
+}));
+
+var Course = mongoose.model("Course", courseSchema);
 
 var statisticSchema = new Schema({
 	name: String,
-	time: {type: Number, default: Date.now()},
+	time: { type: Number, default: Date.now },
 	action: String,
-	leftQueue: {type: Boolean, default: false}
+	leftQueue: { type: Boolean, default: false }
 });
 
 var Statistic = mongoose.model("Statistics", statisticSchema);
 
+// var ingmarmnmn = new User({name: "ingmarmnmn", time: Date.now(), action:"h", comment:"lol"});
+var robert = new User({name: "robert", time: Date.now() + 100, action:"R", comment:"hej"});
+// var oscar = new User({name: "oscar", time: Date.now() + 200, action:"h", comment:"din"});
+// var johan = new User({name: "johan", time: Date.now() + 400, action:"h", comment:"mamma"});
 
-var courseSchema = new Schema({
-	name: String,
-	open: {type: Boolean, default: true},
-	active: {type: Boolean, default: true},
-	queue : [{ type: Schema.Types.ObjectId, ref: 'User' }]
-});
+var tilda = new QueueRoom(new Course({name: "tilda"}));
+var inda = new QueueRoom(new Course({name: "inda"}));
+var prgx = new QueueRoom(new Course({name: "prgx"}));
 
-courseSchema.methods.addUser = fluent(function (user) {
-		this.queue.push(new User({name: user.name, time: user.time, action:user.action, comment:user.comment}));
-		this.save();
-})
+tilda.addUser(robert);
 
-courseSchema.methods.removeUser = fluent(function (username) {
-	this.queue = this.queue.filter(function (user) {
-		return user.name !== username;
-	});
-	this.save();
-})
+// ingmarmnmn.save();
+// robert.save();
+// oscar.save();
+// johan.save();
 
-courseSchema.methods.forUser = fluent(function (fn) {
-	this.queue.forEach(fn);
-	this.save();
-})
+// //inda.listeners = [];
+// inda.queue.push(robert);
+// inda.queue.push(johan);
+// inda.queue.push(ingmarmnmn);
+// tilda.queue.push(oscar);
 
-courseSchema.methods.updateUser = fluent(function (name, user) {
-	this.queue.forEach(function (usr, i, queue) {
-		if (usr.name === name) {
-			_.extend(queue[i], user); 
-		}
-	});
-	this.save();
-})
+// inda.save();
+// tilda.save();
+// prgx.save();
 
-
-
-
-var userSchema = new Schema({
-	name: String,
-	time: Number,
-	action: String,
-	comment: String
-});
-
-var User = mongoose.model("User", userSchema);
-var Course = mongoose.model("Course", courseSchema);
-
-var ingmarmnmn = new User({name: "ingmarmnmn", time: Date.now(), action:"help", comment:"lol"});
-var robert = new User({name: "robert", time: Date.now() + 100, action:"redovisning", comment:"hej"});
-var oscar = new User({name: "oscar", time: Date.now() + 200, action:"help", comment:"din"});
-var johan = new User({name: "johan", time: Date.now() + 400, action:"help", comment:"mamma"});
-
-var tilda = new Course({name: "tilda"});
-var inda = new Course({name: "inda"});
-var prgx = new Course({name: "prgx"});
-
-/*
-ingmarmnmn.save();
-robert.save();
-oscar.save();
-johan.save();
-
-//inda.listeners = [];
-inda.queue.push(robert);
-inda.queue.push(johan);
-inda.queue.push(ingmarmnmn);
-tilda.queue.push(oscar);
-
-inda.save();
-tilda.save();
-prgx.save();
-
-robert.save();
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
+// robert.save();
 
 /**
  * Create a new WebSocket server.
  */
-var WebSocketServer = require("ws").Server;
 var wss = new WebSocketServer({port: 8000});
 var socketExtras = new Map();
 
@@ -220,136 +208,6 @@ function respondWithJSON(res, data) {
 }
 
 /**
- * A flunent function returns this.
- *
- * @param {Function} fn
- * @return {Function}
- */
-function fluent(fn) {
-	return function () {
-		fn.apply(this, arguments);
-		return this;
-	};
-}
-
-/**
- * @param {T} one
- * @return {function(T): boolean}
- */
-function eq(one) {
-	return function (other) {
-		return one === other;
-	};
-}
-
-function not(func) {
-	return function () {
-		return !func.apply(this, arguments);
-	};
-}
-
-/**
- * A set of sockets. Used for listeners.
- */
-function SocketSet() {
-	this.sockets = [];
-}
-
-SocketSet.prototype = {
-	add: function (socket) {
-		if (!this.has(socket)) {
-			this.sockets.push(socket);
-		}
-	},
-
-	remove: function (socket) {
-		this.sockets = this.sockets.filter(not(eq(socket)));
-	},
-
-	has: function (socket) {
-		return this.sockets.some(eq(socket));
-	},
-
-	forEach: function (fn) {
-		this.sockets.forEach(fn);
-	}
-};
-
-/**
- * A QueueRoom consists of a number
- * of queuing students and connections
- * interested in updates to the queue.
- */
-function QueueRoom(name) {
-	this.name = name;
-	this.listeners = new SocketSet();
-	this.queue = [];
-	this.open = true;
-	this.active = true;
-
-	this.toJSON = function () {
-		return {
-			name: this.name,
-			size: this.queue.length,
-			open: this.open,
-			active: this.active
-		};
-	};
-}
-
-QueueRoom.prototype = {
-	updateWith: fluent(function (data) {
-		if (typeof data.name === 'string' && this.name !== data.name) {
-			queues[this.name] = undefined;
-			queues[data.name] = this;
-			this.name = data.name;
-		}
-
-		if (typeof data.open === 'boolean') {
-			this.open = data.open;
-		}
-
-		if (typeof data.active === 'boolean') {
-			this.active = data.active;
-		}
-	}),
-
-	addListener: fluent(function (socket) {
-		this.listeners.add(socket);
-	}),
-
-	removeListener: fluent(function (socket) {
-		this.listeners.remove(socket);
-	}),
-
-	forListener: fluent(function (fn) {
-		this.listeners.forEach(fn);
-	}),
-
-	addUser: fluent(function (user) {
-		this.queue.push(user);
-	}),
-
-	removeUser: fluent(function (username) {
-		this.queue = this.queue.filter(function (user) {
-			return user.name !== username;
-		});
-	}),
-
-	forUser: fluent(function (fn) {
-		this.queue.forEach(fn);
-	}),
-
-	updateUser: fluent(function (name, user) {
-		this.queue.forEach(function (usr, i, queue) {
-			if (usr.name === name) {
-				_.extend(queue[i], user);
-			}
-		});
-	})
-};
-
-/**
  * TODO: database
  * Initial course representation.
  */
@@ -360,10 +218,27 @@ var courseListeners = new SocketSet();
 /**
  * The current list of queues.
  */
-var queues = {};
-courses.forEach(function (course) {
-	queues[course] = new QueueRoom(course);
-});
+var queues = //{};
+{
+	'tilda': tilda,
+	'inda': inda,
+	'prgx': prgx
+};
+
+// Course.find(function (err, courses) {
+// 	if (err) {
+// 		console.error('Could not find any courses', err);
+// 		return;
+// 	}
+
+// 	courses.forEach(function (course) {
+// 		queues[course.name] = new QueueRoom(course);
+// 	});
+// });
+
+// courses.forEach(function (course) {
+// 	queues[course] = QueueRoom.fromName(course);
+// });
 
 /**
  * Sends the list of courses to the client.
@@ -405,7 +280,7 @@ function getRoom(name) {
  * @return {Array} queue
  */
 function getQueue(name) {
-	return getRoom(name).queue;
+	return getRoom(name).courseData.queue;
 }
 
 /**
