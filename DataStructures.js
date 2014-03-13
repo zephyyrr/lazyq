@@ -77,19 +77,21 @@ function QueueRoom(course) {
 
 QueueRoom.prototype = {
 	updateWith: fluent(function (data) {
-		if (typeof data.name === 'string' && this.name !== data.name) {
-			queues[this.name] = undefined;
-			queues[data.name] = this;
-			this.name = data.name;
+		var d = this.courseData;
+		if (typeof data.name === 'string' && d.name !== data.name) {
+			queues[d.name] = undefined;
+			queues[data.name] = d;
+			d.name = data.name;
 		}
 
 		if (typeof data.open === 'boolean') {
-			this.open = data.open;
+			d.open = data.open;
 		}
 
 		if (typeof data.active === 'boolean') {
-			this.active = data.active;
+			d.active = data.active;
 		}
+		d.save();
 	}),
 
 	addListener: fluent(function (socket) {

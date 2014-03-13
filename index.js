@@ -26,13 +26,13 @@ app.listen(8080);
 /**
  * Establish a connection to MongoDB
  */
-// mongoose.connect('mongodb://localhost/test');
+mongoose.connect('mongodb://localhost/test');
 
-// var db = mongoose.connection;
-// db.on('error', console.error.bind(console, 'connection error:'));
-// db.once('open', function callback () {
-//   // yay!
-// });
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function callback () {
+  // yay!
+});
 
 var Schema = mongoose.Schema;
 
@@ -95,15 +95,14 @@ var statisticSchema = new Schema({
 var Statistic = mongoose.model("Statistics", statisticSchema);
 
 // var ingmarmnmn = new User({name: "ingmarmnmn", time: Date.now(), action:"h", comment:"lol"});
-var robert = new User({name: "robert", time: Date.now() + 100, action:"R", comment:"hej"});
+// var robert = new User({name: "robert", time: Date.now() + 100, action:"R", comment:"hej"});
 // var oscar = new User({name: "oscar", time: Date.now() + 200, action:"h", comment:"din"});
 // var johan = new User({name: "johan", time: Date.now() + 400, action:"h", comment:"mamma"});
 
 var tilda = new QueueRoom(new Course({name: "tilda"}));
 var inda = new QueueRoom(new Course({name: "inda"}));
 var prgx = new QueueRoom(new Course({name: "prgx"}));
-
-tilda.addUser(robert);
+//tilda.addUser(robert);
 
 // ingmarmnmn.save();
 // robert.save();
@@ -218,23 +217,23 @@ var courseListeners = new SocketSet();
 /**
  * The current list of queues.
  */
-var queues = //{};
-{
-	'tilda': tilda,
-	'inda': inda,
-	'prgx': prgx
-};
+var queues = {};
+// {
+// 	'tilda': tilda,
+// 	'inda': inda,
+// 	'prgx': prgx
+// };
 
-// Course.find(function (err, courses) {
-// 	if (err) {
-// 		console.error('Could not find any courses', err);
-// 		return;
-// 	}
+Course.find(function (err, courses) {
+	if (err) {
+		console.error('Could not find any courses', err);
+		return;
+	}
 
-// 	courses.forEach(function (course) {
-// 		queues[course.name] = new QueueRoom(course);
-// 	});
-// });
+	courses.forEach(function (course) {
+		queues[course.name] = new QueueRoom(course);
+	});
+});
 
 // courses.forEach(function (course) {
 // 	queues[course] = QueueRoom.fromName(course);
