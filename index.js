@@ -129,7 +129,7 @@ function respondWithJSON(res, data) {
  * TODO: database
  * Initial course representation.
  */
-var courses = ['inda', 'tilda', 'numme'];
+var courses = [];
 
 var courseListeners = new SocketSet();
 
