@@ -10,6 +10,129 @@ app.listen(8080);
 
 var _ = require('lodash');
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+mongoose.connect('mongodb://localhost/test');
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function callback () {
+  // yay!
+});
+
+
+
+
+var statisticSchema = new Schema({
+	name: String,
+	time: {type: Number, default: Date.now()},
+	action: String,
+	leftQueue: {type: Boolean, default: false}
+});
+
+var Statistic = mongoose.model("Statistics", statisticSchema);
+
+
+var courseSchema = new Schema({
+	name: String,
+	open: {type: Boolean, default: true},
+	active: {type: Boolean, default: true},
+	queue : [{ type: Schema.Types.ObjectId, ref: 'User' }]
+});
+
+courseSchema.methods.addUser = fluent(function (user) {
+		this.queue.push(new User({name: user.name, time: user.time, action:user.action, comment:user.comment}));
+		this.save();
+})
+
+courseSchema.methods.removeUser = fluent(function (username) {
+	this.queue = this.queue.filter(function (user) {
+		return user.name !== username;
+	});
+	this.save();
+})
+
+courseSchema.methods.forUser = fluent(function (fn) {
+	this.queue.forEach(fn);
+	this.save();
+})
+
+courseSchema.methods.updateUser = fluent(function (name, user) {
+	this.queue.forEach(function (usr, i, queue) {
+		if (usr.name === name) {
+			_.extend(queue[i], user); 
+		}
+	});
+	this.save();
+})
+
+
+
+
+var userSchema = new Schema({
+	name: String,
+	time: Number,
+	action: String,
+	comment: String
+});
+
+var User = mongoose.model("User", userSchema);
+var Course = mongoose.model("Course", courseSchema);
+
+var ingmarmnmn = new User({name: "ingmarmnmn", time: Date.now(), action:"help", comment:"lol"});
+var robert = new User({name: "robert", time: Date.now() + 100, action:"redovisning", comment:"hej"});
+var oscar = new User({name: "oscar", time: Date.now() + 200, action:"help", comment:"din"});
+var johan = new User({name: "johan", time: Date.now() + 400, action:"help", comment:"mamma"});
+
+var tilda = new Course({name: "tilda"});
+var inda = new Course({name: "inda"});
+var prgx = new Course({name: "prgx"});
+
+/*
+ingmarmnmn.save();
+robert.save();
+oscar.save();
+johan.save();
+
+//inda.listeners = [];
+inda.queue.push(robert);
+inda.queue.push(johan);
+inda.queue.push(ingmarmnmn);
+tilda.queue.push(oscar);
+
+inda.save();
+tilda.save();
+prgx.save();
+
+robert.save();
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Create a new WebSocket server.
  */
