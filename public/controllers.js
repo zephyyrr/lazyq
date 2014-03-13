@@ -163,6 +163,29 @@ function ($scope, params, User, Queue, Nav, Title) {
 	};
 }])
 
+.controller('BroadcastCtrl', ['$scope', '$modal', 'QueueService', function($scope, $modal, $log, Queue) {
+	$scope.open = function() {
+		var modalInstance = $modal.open({
+			templateUrl: 'template/BroadcastModal.html',
+			controller: BroadcastModalCtrl,
+		});
+		
+		modalInstance.result.then(function (message) {
+			Queue.broadcast(message)
+		})
+	}
+}])
+
+.controller('BroadcastModalCtrl', ['$scope', '$modalInstance', function($scope, $modalInstance) {
+	$scope.message = "";
+	$scope.ok = function() {
+		$modalInstance.close($scope.message);
+	};
+	$scope.cancel = function() {
+		$modalInstance.dismiss('cancel');
+	}
+}])
+
 .controller('NameCtrl', ['$scope', 'UserService', '$location', function ($scope, User, $location) {
 	$scope.done = function () {
 		User.setName($scope.name);
