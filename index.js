@@ -3,9 +3,9 @@
  * Get express, make an app and serve static
  * files on port 8080.
  */
-var express					= require('express');
-var _								= require('lodash');
-var mongoose				= require('mongoose');
+var express	= require('express');
+var _	= require('lodash');
+var mongoose = require('mongoose');
 var WebSocketServer = require("ws").Server;
 
 var structs = require('./DataStructures.js');
@@ -312,7 +312,43 @@ function notify(command) {
 	}
 }
 
+setUpAutoPurge();
 
+function setUpAutoPurge (argument) {
+	var middnight = new Date()
+	middnight.setHours(23)
+	middnight.setMinutes(58)
+	console.log("minutes to purge",(middnight.getTime() - Date.now())/60*1000)
+	middnight = middnight.getTime() - Date.now();
+
+	setTimeout(autoPurgeUsers, middnight);
+}
+
+function autoPurgeUsers () {
+	purgeUsers();
+	setInterval(purgeUsers, 24*60*60*1000);
+}
+
+/**
+ * Purges all the users from all the queues
+ */
+function purgeUsers(){
+	for(var courseName in queues) {
+  	console.log(queues[courseName].courseData.name);
+  	queues[courseName].courseData.queue.forEach(function (user) {
+		console.log(user.name);
+			removeUser(courseName, user)
+		})
+	}
+}
+
+function removeUser (courseName, user) {
+	getRoom(courseName).removeUser(user.name)
+	.forListener(notify("queue/remove", courseName, user.name));
+
+	courseListeners.forEach(notify("courses/update", courseName,
+		{size: getQueue(courseName).length}));
+}
 
 
 // var test1 = new QueueRoom(new Course({name: "test1"}));

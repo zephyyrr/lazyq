@@ -14,7 +14,7 @@ function fluent(fn) {
 function saving(func) {
 	return function () {
 		func.apply(this, arguments);
-		console.log('Saving:', JSON.stringify(this));
+		// console.log('Saving:', JSON.stringify(this));
 		this.save();
 	}
 }
