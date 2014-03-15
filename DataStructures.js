@@ -55,26 +55,6 @@ function QueueRoom(course) {
 	};
 }
 
-// QueueRoom.fromName = function (name) {
-// 	var courseData = _.extend(Object.create(courseDataProto), {
-// 		name: name,
-// 		queue: [],
-// 		open: true,
-// 		active: true
-// 	});
-
-// 	return new QueueRoom(courseData);
-// };
-
-// var courseDataProto = _.extend({
-// 	save: function () {}
-// }, courseSchema.methods, {
-// 	save: function () {},
-// 	addUser: function (user) {
-// 		this.queue.push(user);
-// 	}
-// });
-
 QueueRoom.prototype = {
 	updateWith: fluent(function (data) {
 		var d = this.courseData;
