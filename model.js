@@ -12,7 +12,7 @@ var statisticSchema = new Schema({
 	time: { type: Number, default: Date.now },
 	action: String,
 	leftQueue: { type: Boolean, default: false },
-	queLength: { type: Number, default: 0}
+	queueLength: { type: Number, default: 0}
 });
 
 statisticSchema.index({time: 1});
@@ -44,18 +44,20 @@ var courseSchema = new Schema({
 });
 
 courseSchema.methods.addUser = fluent(saving(function (user) {
+	var qLength = this.queue.length;
 	this.queue.push(user);
 	var stat = new Statistic({
 		name: this.name, 
 		time: Date.now(), 
 		action: user.action, 
-		leftQueue: false, 
-		queLength:  this.queue.length});
+		leftQueue: false,
+		queueLength: qLength});
 	stat.save();
 }));
 
 courseSchema.methods.removeUser = fluent(saving(function (username) {
-	getStatistics(this.name, Date.now()-30000, Date.now())
+	var qLength = this.queue.length;
+	//getStatistics(this.name, Date.now()-30000, Date.now())
 	var courseName = this.name;
 	this.queue = this.queue.filter(function (user) {
 		if (user.name === username) {
@@ -63,9 +65,9 @@ courseSchema.methods.removeUser = fluent(saving(function (username) {
 				name: courseName, 
 				time: Date.now(), 
 				action: user.action, 
-				leftQueue: true, 
-				queLength:  this.queue.length});
-			stat.save()
+				leftQueue: true,
+				queueLength: qLength});
+			stat.save();
 		};
 		return user.name !== username;
 	});
