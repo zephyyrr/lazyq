@@ -273,8 +273,8 @@ commands.set("queue/remove", function (course, username) {
 			.removeUser(username)
 			.forListener(notify("queue/remove", course, username));
 
-		courseListeners.forEach(notify("courses/update", course,
-			{size: getQueue(course).length}));
+		// courseListeners.forEach(notify("courses/update", course,
+		// 	{size: getQueue(course).length}));
 	} catch (e) {
 		console.error(e);
 	}
@@ -315,10 +315,10 @@ function notify(command) {
 setUpAutoPurge();
 
 function setUpAutoPurge (argument) {
-	var middnight = new Date()
-	middnight.setHours(23)
-	middnight.setMinutes(58)
-	console.log("minutes to purge",(middnight.getTime() - Date.now())/60*1000)
+	var middnight = new Date();
+	middnight.setHours(23);
+	middnight.setMinutes(58);
+	console.log("minutes to purge",(middnight.getTime() - Date.now())/60*1000);
 	middnight = middnight.getTime() - Date.now();
 
 	setTimeout(autoPurgeUsers, middnight);
@@ -337,7 +337,7 @@ function purgeUsers(){
   	console.log(queues[courseName].courseData.name);
   	queues[courseName].courseData.queue.forEach(function (user) {
 		console.log(user.name);
-			removeUser(courseName, user)
+			removeUser(courseName, user);
 		})
 	}
 }
@@ -355,7 +355,7 @@ function removeUser (courseName, user) {
 // var test2 = new QueueRoom(new Course({name: "test2"}));
 // var test3 = new QueueRoom(new Course({name: "test3"}));
 // queues = 
-// {
+// {length
 // 	'test1': test1,
 // 	'test2': test2,
 // 	'test3': test3
