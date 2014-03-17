@@ -11,10 +11,7 @@
 
 <div class="bottomControls">
 	
-	<div ng-controller="BroadcastModalCtrl">
-		<button class="btn btn-default" ng-click="open()">Broadcast</button>
-		<div ng-show="message">Selection from a modal: {{ message }}</div>
-	</div>
+	<button class="btn btn-default" ng-click="openBroadcastModal()">Broadcast</button>
 	
 	<form ng-hide="queued" ng-submit="joinQueue()">
 		<input class="form-control" style="width: 100%;" type="text" ng-model="comment" placeholder="Comment..." autofocus>

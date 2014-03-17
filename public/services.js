@@ -109,7 +109,7 @@ angular.module('LazyQ')
  */
 .factory('QueueService', ['$http', 'WebSocketService', function ($http, socket) {
 	//socket
-	var commands = ['add', 'remove', 'update'];
+	var commands = ['add', 'remove', 'update', 'broadcast'];
 
 	function makeCommands(course) {
 		var o = {};
@@ -157,6 +157,11 @@ angular.module('LazyQ')
 			});
 
 			this.course && socket.send('queue/mute', this.course);
+		}, 
+		
+		broadcast: function (message) {
+			var packet = {message: message, source: 'SYSTEM'}
+			this.course && socket.send('queue/broadcast', this.course, packet)
 		}
 	}
 }])

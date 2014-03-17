@@ -76,8 +76,8 @@ function ($scope, $location, Nav, User) {
 }])
 
 .controller('QueueCtrl',
-['$scope', '$routeParams', 'UserService', 'QueueService', 'NavService', 'TitleService',
-function ($scope, params, User, Queue, Nav, Title) {
+['$scope', '$routeParams', '$modal', 'UserService', 'QueueService', 'NavService', 'TitleService',
+function ($scope, params, $modal, User, Queue, Nav, Title) {
 	var socket;
 
 	Nav.title = $scope.course = params.course;
@@ -142,6 +142,7 @@ function ($scope, params, User, Queue, Nav, Title) {
 				$scope.queued = isQueuing();
 			});
 		},
+		
 		function update(course, username, updatedUser) {
 			$scope.$apply(function () {
 				$scope.queue.forEach(function (user, i) {
@@ -151,6 +152,10 @@ function ($scope, params, User, Queue, Nav, Title) {
 				});
 				$scope.queued = isQueuing();
 			});
+		}, 
+		
+		function broadcast(course, message) {
+			alert(message.source + " says: " + text);
 		});
 
 	function withName (name) {
@@ -180,25 +185,23 @@ function ($scope, params, User, Queue, Nav, Title) {
 	$scope.leaveQueue = function () {
 		socket.remove(User.getName());
 	};
-}])
-
-.controller('BroadcastCtrl', ['$scope', '$modal', 'QueueService', function($scope, $modal, $log, Queue) {
-	$scope.open = function() {
+	
+	$scope.openBroadcastModal = function() {
 		var modalInstance = $modal.open({
 			templateUrl: 'template/BroadcastModal.html',
-			controller: BroadcastModalCtrl,
+			controller: 'BroadcastModalCtrl',
 		});
-		
-		modalInstance.result.then(function (message) {
-			Queue.broadcast(message)
-		})
 	}
 }])
 
-.controller('BroadcastModalCtrl', ['$scope', '$modalInstance', function($scope, $modalInstance) {
-	$scope.message = "";
+.controller('BroadcastModalCtrl', ['$scope', '$modalInstance', 'QueueService', function($scope, $modalInstance, Queue) {
+	$scope.broadcast = {
+		message: ""
+	}
 	$scope.ok = function() {
-		$modalInstance.close($scope.message);
+		console.log($scope.broadcast.message)
+		Queue.broadcast($scope.broadcast.message)
+		$modalInstance.close($scope.broadcast.message);
 	};
 	$scope.cancel = function() {
 		$modalInstance.dismiss('cancel');
