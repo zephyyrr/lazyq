@@ -19,6 +19,12 @@
 			</button>
 		</div>
 	</lq-card>
+	
+	<div class="lq-queuecard green" ng-class="{enroute: user.enroute}" ng-show="user.isAdmin()" ng-click="openAddCourseModal()">
+		<span class="glyphicon glyphicon-plus-sign"></span>
+		New Course
+	</div>
+	
 </div>
 
 <div class="bottomControls">

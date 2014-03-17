@@ -262,6 +262,10 @@ nav button .glyphicon {
 	margin-bottom: 8em;
 }
 
+.green {
+	background-color: rgb(100, 230, 100)
+}
+
 .enroute {
   animation-duration: 1s;
   animation-name: wobble;

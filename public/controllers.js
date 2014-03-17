@@ -7,8 +7,8 @@ function not(fn) {
 angular.module('LazyQ')
 
 .controller('SearchCtrl',
-['$scope', '$location', 'UserService', 'CourseService',
-function ($scope, $location, User, Courses) {
+['$scope', '$location', '$modal',  'UserService', 'CourseService',
+function ($scope, $location, $modal, User, Courses) {
 	$scope.query = "";
 	$scope.user = User;
 
@@ -58,6 +58,13 @@ function ($scope, $location, User, Courses) {
 	$scope.$on('$locationChangeStart', function () {
 		Courses.offUpdate();
 	});
+	
+	$scope.openAddCourseModal = function() {
+		var modalInstance = $modal.open({
+			templateUrl: 'template/AddCourseModal.html',
+			controller: 'AddCourseModalCtrl',
+		});
+	}
 }])
 
 .controller('NavCtrl',
@@ -202,6 +209,20 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 		console.log($scope.broadcast.message)
 		Queue.broadcast($scope.broadcast.message)
 		$modalInstance.close($scope.broadcast.message);
+	};
+	$scope.cancel = function() {
+		$modalInstance.dismiss('cancel');
+	}
+}])
+
+.controller('AddCourseModalCtrl', ['$scope', '$modalInstance', 'WebSocketService', function($scope, $modalInstance, socket) {
+	$scope.course = {
+		name: ""
+	}
+	$scope.ok = function() {
+		console.log($scope.course.name);
+		socket.send("add/course", $scope.course.name);
+		$modalInstance.close($scope.course.name);
 	};
 	$scope.cancel = function() {
 		$modalInstance.dismiss('cancel');
