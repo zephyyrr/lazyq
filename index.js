@@ -273,8 +273,31 @@ commands.set("queue/remove", function (course, username) {
 			.removeUser(username)
 			.forListener(notify("queue/remove", course, username));
 
-		// courseListeners.forEach(notify("courses/update", course,
-		// 	{size: getQueue(course).length}));
+		courseListeners.forEach(notify("courses/update", course,
+			{size: getQueue(course).length}));
+	} catch (e) {
+		console.error(e);
+	}
+});
+
+
+commands.set("queue/broadcast", function (course, message) {
+	try {
+		console.log(JSON.stringify(course) + " is sent " + JSON.stringify(message) + " message");
+		getRoom(course)
+			.forListener(notify("queue/broadcast", course, message));
+	} catch (e) {
+		console.error(e);
+	}
+});
+
+commands.set("course/add", function (courseName) {
+	try {
+		console.log("Course: " + courseName + " is added");
+		newCourse = new Course({name: courseName});
+		newCourse.save();
+		queues[courseName] = new QueueRoom(newCourse);
+		
 	} catch (e) {
 		console.error(e);
 	}
