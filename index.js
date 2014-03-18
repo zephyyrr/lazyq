@@ -307,6 +307,11 @@ commands.set("courses/listen", function () {
 	courseListeners.add(this);
 });
 
+commands.set("statistics/get", function (course, start, end) {
+	// Statistic.getStatistics(course, start, end)
+	this.notify("statistics/get",{peopleHelped: 666, peoplePresented: 333, leftInQue: 9})
+});
+
 commands.set("courses/update", function (courseName, course) {
 	try {
 		console.log(courseName + " got " + JSON.stringify(course) + " updated.");
