@@ -2,10 +2,11 @@
 	<button class="btn btn-danger" ng-click="admin.remove($event, index)">
 		<span class="glyphicon glyphicon-trash"></span>
 	</button>
-	<br><br>
+	<br>{{ user.isAdmin() }}<br>
+	<!--
 	<button class="btn" ng-class="{'btn-success': !user.enroute, 'btn-warning': user.enroute}" ng-click="admin.accept($event, index)">
 		<span class="glyphicon" ng-class="{'glyphicon-ok': !user.enroute, 'glyphicon-remove': user.enroute}"></span>
-	</button>
+	</button>-->
 </div>
 <div class="lq-queuecard" ng-class="{enroute: user.enroute}">
 	<div class="name">{{ user.name }}</div>

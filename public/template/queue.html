@@ -1,11 +1,11 @@
 <div class="card-space">
 	<lq-queuecard
-		ng-repeat="user in queue"
+		ng-repeat="queuee in queue"
 		index="$index"
-		user="user"
+		user="queuee"
 		admin="admin"
-		ng-swipe-left="admin.open($event)"
-		ng-swipe-right="admin.close($event)">
+		ng-swipe-left="admin.open($event); admin.accept($event, $index)"
+		ng-swipe-right="admin.close($event); admin.unaccept($event, $index)">
 	</lq-queuecard>
 </div>
 
