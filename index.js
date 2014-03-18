@@ -341,7 +341,7 @@ function setUpAutoPurge (argument) {
 	var middnight = new Date();
 	middnight.setHours(23);
 	middnight.setMinutes(58);
-	console.log("minutes to purge",(middnight.getTime() - Date.now())/60*1000);
+	console.log("minutes to purge",(middnight.getTime() - Date.now())/60/1000);
 	middnight = middnight.getTime() - Date.now();
 
 	setTimeout(autoPurgeUsers, middnight);
