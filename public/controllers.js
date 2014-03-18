@@ -161,8 +161,8 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 			});
 		}, 
 		
-		function broadcast(course, message) {
-			alert(message.source + " says: " + text);
+		function broadcast(course, packet) {
+			alert(packet.source + " says: " + packet.message);
 		});
 
 	function withName (name) {
