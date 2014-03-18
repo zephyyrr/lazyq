@@ -246,8 +246,6 @@ commands.set("queue/add", function (course, user) {
 		getRoom(course)
 			.addUser(user)
 			.forListener(notify("queue/add", course, user));
-
-		courseListeners.forEach(notify("courses/update", course,
 			{size: getQueue(course).length}));
 	} catch (e) {
 		console.error(e);
@@ -291,7 +289,7 @@ commands.set("queue/broadcast", function (course, message) {
 	}
 });
 
-commands.set("course/add", function (courseName) {
+commands.set("add/course", function (courseName) {
 	try {
 		console.log("Course: " + courseName + " is added");
 		newCourse = new Course({name: courseName});
