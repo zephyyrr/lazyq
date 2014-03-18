@@ -209,10 +209,14 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 }])
 
 .controller('StatisticsCtrl', ['$scope', 'WebSocketService', function($scope, socket) {
-	$scope.course = ""
+	$scope.course = "";
+	
+	socket.on("statistics/get", function(data) {
+		$scope.stats = data;
+	})
 	
 	$scope.update = function() {
-		socket.send("statistics/get", {course: $scope.course, begin: $scope.begin, end: $scope.end})
+		socket.send("statistics/get", {course: $scope.course, begin: $scope.begin, end: $scope.end});
 	}
 }])
 
