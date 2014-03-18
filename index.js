@@ -312,7 +312,7 @@ commands.set("courses/listen", function () {
 commands.set("statistics/get", function (course,start,end) {
 	console.log("Course: ", course)
 	// Statistic.getStatistics(course, start, end)
-	this.send("statistics/get",stats:{peopleHelped: 666, peoplePresented: 333, leftInQue: 9})
+	this.send("statistics/get":{peopleHelped: 666, peoplePresented: 333, leftInQue: 9})
 });
 
 commands.set("courses/update", function (courseName, course) {
