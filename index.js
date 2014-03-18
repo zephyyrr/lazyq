@@ -307,9 +307,12 @@ commands.set("courses/listen", function () {
 	courseListeners.add(this);
 });
 
-commands.set("statistics/get", function (course, start, end) {
+
+//uggly and broken, please help
+commands.set("statistics/get", function (course,start,end) {
+	console.log("Course: ", course)
 	// Statistic.getStatistics(course, start, end)
-	this.notify("statistics/get",{peopleHelped: 666, peoplePresented: 333, leftInQue: 9})
+	this.send("statistics/get",{peopleHelped: 666, peoplePresented: 333, leftInQue: 9})
 });
 
 commands.set("courses/update", function (courseName, course) {
