@@ -95,6 +95,8 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 		$scope.queue = res.data;
 		$scope.queued = isQueuing();
 	});
+	
+	$scope.user = User
 
 	$scope.admin = {
 		open: User.admin(function ($event) {
@@ -111,7 +113,12 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 
 		accept: User.admin(function ($event, i) {
 			var u = $scope.queue[i];
-			socket.update(u.name, {enroute: !u.enroute});
+			socket.update(u.name, {enroute: true});
+		}),
+		
+		unaccept: User.admin(function ($event, i) {
+			var u = $scope.queue[i];
+			socket.update(u.name, {enroute: false})
 		})
 	};
 
@@ -198,6 +205,14 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 			templateUrl: 'template/BroadcastModal.html',
 			controller: 'BroadcastModalCtrl',
 		});
+	}
+}])
+
+.controller('StatisticsCtrl', ['$scope', 'WebSocketService', function($scope, socket) {
+	$scope.course = ""
+	
+	$scope.update = function() {
+		socket.send("statistics/get", {course: $scope.course, begin: $scope.begin, end: $scope.end})
 	}
 }])
 

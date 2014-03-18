@@ -20,6 +20,10 @@ angular.module('LazyQ', ['ngTouch', 'ngRoute', 'ui.bootstrap'])
 		templateUrl: 'template/namepicker.html',
 		controller: 'NameCtrl'
 	})
+	.when('/stats', {
+		templateUrl: 'template/statistics.html',
+		controller: 'StatisticsCtrl'
+	})
 	.otherwise({
 		redirectTo: '/name'
 	});

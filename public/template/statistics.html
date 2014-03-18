@@ -1,0 +1,10 @@
+<datetimepicker ng-model="begin"></datetimepicker>
+<datetimepicker ng-model="end"></datetimepicker>
+<input type="text" ng-model="course">
+<button ng-click="update()">Update</button>
+
+<ul ng-show="stats !== undefined">
+	<li>{{ stats.peopleHelped }} people helped.</li>
+	<li>{{ stats.peoplePresented }} presentations taken.</li>
+	<li>{{ stats.leftInQueue }} left behind.</li>
+</ul>
