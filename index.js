@@ -246,6 +246,8 @@ commands.set("queue/add", function (course, user) {
 		getRoom(course)
 			.addUser(user)
 			.forListener(notify("queue/add", course, user));
+
+		courseListeners.forEach(notify("courses/update", course,
 			{size: getQueue(course).length}));
 	} catch (e) {
 		console.error(e);
