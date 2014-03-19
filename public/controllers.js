@@ -241,7 +241,7 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 	  };
 	
 	$scope.update = function() {
-		socket.send("statistics/get", {course: $scope.course, begin: $scope.begin, end: $scope.end});
+		socket.send("statistics/get", {course: $scope.course, begin: $scope.begin.date, end: $scope.end.date});
 	}
 	//$scope.update()	
 	$scope.courses = Courses
