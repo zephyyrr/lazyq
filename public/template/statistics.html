@@ -1,23 +1,47 @@
 <form ng-submit="update()">
-	<!--
-	<datetimepicker ng-model="begin"></datetimepicker>
-	<datetimepicker ng-model="end"></datetimepicker>-->
-	<p>
-		<input type="datetime" ng-model="begin" name="begin" placeholder="Begin">
-	</p>
+	<div class="well well-sm container-fluid" style="width: auto; margin: 0px 15px">
+		<input type="text" class="form-control" ng-model="course" placeholder="Course"
+			typeahead="course for course in courses.list() | filter:$viewValue | limitTo:8" >
 	
-	<p>
-		<input type="datetime" ng-model="begin" name="begin" placeholder="End">
-	</p>
+		<div class="row">
+			<div class="col-md-2"></div>
+			<div class="col-md-4" style="margin: 0x auto;">
+				<label>Begin date: {{ begin.date.toLocaleDateString() }}</label>
+				<datepicker ng-model="begin.date" max="end.date" show-weeks="showWeeks"></datepicker>
+			</div>
+			<div class="col-md-4" style="margin: 0x auto;">
+				<label>End date: {{ end.date.toLocaleDateString() }}</label>
+				<datepicker ng-model="end.date" min="begin.date" max="today" show-weeks="showWeeks"></datepicker>
+			</div>
+			<div class="col-md-2"></div>
+		</div>
 	
-	<p>
-	<input type="text" ng-model="course" placeholder="Course">
-	</p>
-	<input type="submit">Update</button>
+		<input type="submit" class="form-control" value="Update">
+	</div>
+	
+	<div class="well well-sm container-fluid" style="width: auto; margin: 15px" ng-show="stats">
+		<div class="row">
+			<div class="col-md-12">
+				Between the above dates<span ng-show="course">, in the course {{ course }},</span> 
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<span class="h2">{{ stats.peopleHelped }}</span> people helped.
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-md-12">
+				<span class="h2">{{ stats.peoplePresented }}</span> presentations taken.
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-md-12">
+				<span class="h2">{{ stats.leftInQueue }}</span> was left behind.
+			</div>
+		</div>
+	</div>
 </form>
 
-<ul ng-show="stats !== undefined">
-	<li>{{ stats.peopleHelped }} people helped.</li>
-	<li>{{ stats.peoplePresented }} presentations taken.</li>
-	<li>{{ stats.leftInQueue }} left behind.</li>
-</ul>

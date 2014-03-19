@@ -14,17 +14,19 @@
 	<button class="btn btn-default" ng-click="openBroadcastModal()">Broadcast</button>
 	
 	<form ng-hide="queued" ng-submit="joinQueue()">
-		<input class="form-control" style="width: 100%;" type="text" ng-model="comment" placeholder="Comment..." autofocus>
+		<input class="form-control" style="width: 100%;" maxlength="64" type="text" ng-model="comment" placeholder="Comment..." autofocus>
 
 		<div class="btn-group">
-      <button type="button" class="btn btn-default" ng-model="action" btn-radio="'H'">Help</button>
-      <button type="button" class="btn btn-default" ng-model="action" btn-radio="'P'">Present</button>
-    </div>
+			<button type="button" class="btn btn-default" ng-model="action" btn-radio="'H'">Help</button>
+			<button type="button" class="btn btn-default" ng-model="action" btn-radio="'P'">Present</button>
+		</div>
 
 		<input class="btn btn-primary" type="submit" value="Enqueue">
 	</form>
 
 	<form ng-show="queued" ng-submit="leaveQueue()">
+		<input class="form-control" style="width: 100%;" maxlength="64" type="text" ng-model="comment" placeholder="Comment..."
+			ng-change="updateComment()">
 		<input class="btn btn-danger" type="submit" value="Dequeue">
 	</form>
 </div>

@@ -192,12 +192,17 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 			};
 
 			socket.add(user);
-			$scope.comment = '';
+			//$scope.comment = '';
 		}
+	};
+	
+	$scope.updateComment = function () {
+		socket.update(User.getName(), {comment: $scope.comment})
 	};
 
 	$scope.leaveQueue = function () {
 		socket.remove(User.getName());
+		$scope.comment = '';
 	};
 	
 	$scope.openBroadcastModal = function() {
@@ -208,16 +213,38 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 	}
 }])
 
-.controller('StatisticsCtrl', ['$scope', 'WebSocketService', function($scope, socket) {
+.controller('StatisticsCtrl', ['$scope', 'WebSocketService', 'CourseService', function($scope, socket, Courses) {
 	$scope.course = "";
+	//$scope.stats = {};
+	$scope.today = new Date();
+	
+	$scope.begin = {
+		date: new Date(),
+		open: false,
+	}
+	$scope.end = {
+		date: new Date(),
+		open: false,
+	}
 	
 	socket.on("statistics/get", function(data) {
-		$scope.stats = data;
+		$scope.$apply(function () {
+            $scope.stats = data;
+        });
 	})
+	
+	$scope.open = function($event) {
+		$event.preventDefault();
+		$event.stopPropagation();
+
+		$scope.opened = true;
+	  };
 	
 	$scope.update = function() {
 		socket.send("statistics/get", {course: $scope.course, begin: $scope.begin, end: $scope.end});
 	}
+	//$scope.update()	
+	$scope.courses = Courses
 }])
 
 .controller('BroadcastModalCtrl', ['$scope', '$modalInstance', 'QueueService', function($scope, $modalInstance, Queue) {

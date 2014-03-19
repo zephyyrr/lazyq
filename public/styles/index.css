@@ -278,6 +278,11 @@ nav button .glyphicon {
   -webkit-animation-direction: alternate;
 }
 
+.snugfit {
+	width: 275px;
+	margin: 0px auto
+}
+
 @-moz-keyframes wobble {
   from {
   	transform: scale(0.95);
