@@ -226,6 +226,8 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 		date: new Date(),
 		open: false,
 	}
+	$scope.begin.date.setHours(0)
+	$scope.begin.date.setMinutes(0)
 	
 	socket.on("statistics/get", function(data) {
 		$scope.$apply(function () {
@@ -241,7 +243,7 @@ function ($scope, params, $modal, User, Queue, Nav, Title) {
 	  };
 	
 	$scope.update = function() {
-		socket.send("statistics/get", {course: $scope.course, begin: $scope.begin.date, end: $scope.end.date});
+		socket.send("statistics/get", {course: $scope.course, begin: $scope.begin.date.getTime(), end: $scope.end.date.getTime()});
 	}
 	//$scope.update()	
 	$scope.courses = Courses
