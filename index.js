@@ -7,6 +7,7 @@ var express	= require('express');
 var _	= require('lodash');
 var mongoose = require('mongoose');
 var WebSocketServer = require("ws").Server;
+var dns = require("dns");
 
 var structs = require('./DataStructures.js');
 var SocketSet = structs.SocketSet;
@@ -38,6 +39,7 @@ var model = require('./model.js');
 var User = model.User;
 var Statistic = model.Statistic;
 var Course = model.Course;
+var getStatistics = model.getStatistics;
 
 
 /**
@@ -309,11 +311,25 @@ commands.set("courses/listen", function () {
 
 
 //uggly and broken, please help
-commands.set("statistics/get", function (course,start,end) {
-	console.log("Course: ", course)
-	// Statistic.getStatistics(course, start, end)
-	this.send("statistics/get:[" + JSON.stringify({peopleHelped: 666, peoplePresented: 333, leftInQueue: 9}) + "]")
+commands.set("statistics/get", function (courseName,start,end) {
+	// var ip = this.upgradeReq.headers.host.split(":")[0];
+	var ip = this.upgradeReq.connection.remoteAddress;
+	console.log(ip);
+
+	var thisSocket = this;
+
+	getStatistics(courseName, start, end, function (err, statData){
+		console.log(statData);
+		thisSocket.send("statistics/get:[" + JSON.stringify(statData) + "]");
+		console.log("finished");
+	}
+	)
+	dns.reverse(ip, function (err, domains) {
+		console.log(domains);
+	});
 });
+
+
 
 commands.set("courses/update", function (courseName, course) {
 	try {
