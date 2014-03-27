@@ -39,7 +39,6 @@ var model = require('./model.js');
 var User = model.User;
 var Statistic = model.Statistic;
 var Course = model.Course;
-var getStatistics = model.getStatistics;
 
 
 /**
@@ -318,7 +317,7 @@ commands.set("statistics/get", function (courseName,start,end) {
 
 	var thisSocket = this;
 
-	getStatistics(courseName, start, end, function (err, statData){
+	Statistic.getStatistics(courseName, start, end, function (err, statData){
 		console.log(statData);
 		thisSocket.send("statistics/get:[" + JSON.stringify(statData) + "]");
 		console.log("finished");

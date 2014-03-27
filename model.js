@@ -7,6 +7,23 @@ var util = require('./util.js');
 var fluent = util.fluent;
 var saving = util.saving;
 
+
+var adminSchema = new Schema(({
+	name: String,
+	addedBy: String,
+}))
+
+var Admin = mongoose.model("Admin", adminSchema);
+
+/**
+ * checks if the user is a superadmin
+ * @param {WebSocket} socket
+ */
+adminSchema.statics.isSuperAdmin = fluent(saving(function (user, cb) {
+	Admin.find({user: user}, cb)
+}));
+
+
 var statisticSchema = new Schema({
 	name: String,
 	time: { type: Number, default: Date.now },
@@ -18,12 +35,15 @@ var statisticSchema = new Schema({
 statisticSchema.index({time: 1});
 var Statistic = mongoose.model("Statistic", statisticSchema);
 
+
 var userSchema = new Schema({
 	name: String,
 	time: { type: Number, default: Date.now },
 	action: String,
 	comment: { type: String, default: '' }
 });
+
+var User = mongoose.model("User", userSchema);
 
 userSchema.methods.toJSON = function () {
 	return {
@@ -34,14 +54,20 @@ userSchema.methods.toJSON = function () {
 	};
 };
 
-var User = mongoose.model("User", userSchema);
 
 var courseSchema = new Schema({
 	name: String,
 	open: { type: Boolean, default: true },
 	active: { type: Boolean, default: true },
-	queue : [userSchema]
+	queue: [userSchema],
+	admin: [adminSchema]
 });
+
+var Course = mongoose.model("Course", courseSchema);
+
+courseSchema.methods.addAdmin = fluent(saving function (user, newAdmin) {
+	thisCourse = this.course;
+}));
 
 courseSchema.methods.addUser = fluent(saving(function (user) {
 	var qLength = this.queue.length;
@@ -85,9 +111,12 @@ courseSchema.methods.updateUser = fluent(saving(function (name, user) {
 	});
 }));
 
-var Course = mongoose.model("Course", courseSchema);
+courseSchema.statics.isAdmin = fluent(saving(function (courseName, user, cb) {
+	Course.find({course: courseName, "admin.name": user}, cb);
+}));
 
-function getStats(course, start, end, callbackDo){
+
+statisticSchema.statics.getStatistics =  function (course, start, end, callbackDo){
 	async.parallel([
 
 	function(callback){
@@ -132,12 +161,10 @@ function getStats(course, start, end, callbackDo){
       callback(null, amount);
     });
 	}],
-	// optional callback
+
 	function(err, results){
 		console.log("res data",results)
 		callbackDo(null, {peopleHelped: results[0], peoplePresented: results[1], leftInQueue: (results[2] - results[3])});
-	    // the results array will equal ['one','two'] even though
-	    // the second function had a shorter timeout.
 	});
 
 }
@@ -146,6 +173,7 @@ function getStats(course, start, end, callbackDo){
 module.exports = {
 	User: User,
 	Course: Course,
-	Statistic: Statistic,
-	getStatistics: getStats
+	Statistic: Statistic
 };
+
+
