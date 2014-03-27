@@ -319,9 +319,11 @@ commands.set("statistics/get", function (courseName,start,end) {
 
 	Statistic.getStatistics(courseName, start, end, function (err, statData){
 		console.log(statData);
+		// notify(command)(thisSocket);
 		thisSocket.send("statistics/get:[" + JSON.stringify(statData) + "]");
 		console.log("finished");
 	}
+
 	)
 	dns.reverse(ip, function (err, domains) {
 		console.log(domains);

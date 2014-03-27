@@ -65,8 +65,9 @@ var courseSchema = new Schema({
 
 var Course = mongoose.model("Course", courseSchema);
 
-courseSchema.methods.addAdmin = fluent(saving function (user, newAdmin) {
+courseSchema.methods.addAdmin = fluent(saving(function (user, newAdmin) {
 	thisCourse = this.course;
+
 }));
 
 courseSchema.methods.addUser = fluent(saving(function (user) {
