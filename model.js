@@ -43,7 +43,6 @@ var userSchema = new Schema({
 	comment: { type: String, default: '' }
 });
 
-var User = mongoose.model("User", userSchema);
 
 userSchema.methods.toJSON = function () {
 	return {
@@ -60,10 +59,8 @@ var courseSchema = new Schema({
 	open: { type: Boolean, default: true },
 	active: { type: Boolean, default: true },
 	queue: [userSchema],
-	admin: [adminSchema]
+	admin: {type:[adminSchema], default: []}
 });
-
-var Course = mongoose.model("Course", courseSchema);
 
 courseSchema.methods.addAdmin = fluent(saving(function (user, newAdmin) {
 	thisCourse = this.course;
@@ -115,6 +112,10 @@ courseSchema.methods.updateUser = fluent(saving(function (name, user) {
 courseSchema.statics.isAdmin = fluent(saving(function (courseName, user, cb) {
 	Course.find({course: courseName, "admin.name": user}, cb);
 }));
+
+var User = mongoose.model("User", userSchema);
+
+var Course = mongoose.model("Course", courseSchema);
 
 
 statisticSchema.statics.getStatistics =  function (course, start, end, callbackDo){
