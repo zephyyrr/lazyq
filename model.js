@@ -13,7 +13,6 @@ var adminSchema = new Schema(({
 	addedBy: String,
 }))
 
-var Admin = mongoose.model("Admin", adminSchema);
 
 /**
  * checks if the user is a superadmin
@@ -33,7 +32,6 @@ var statisticSchema = new Schema({
 });
 
 statisticSchema.index({time: 1});
-var Statistic = mongoose.model("Statistic", statisticSchema);
 
 
 var userSchema = new Schema({
@@ -117,6 +115,10 @@ var User = mongoose.model("User", userSchema);
 
 var Course = mongoose.model("Course", courseSchema);
 
+var Admin = mongoose.model("Admin", adminSchema);
+
+var Statistic = mongoose.model("Statistic", statisticSchema);
+
 
 statisticSchema.statics.getStatistics =  function (course, start, end, callbackDo){
 	async.parallel([
@@ -170,6 +172,7 @@ statisticSchema.statics.getStatistics =  function (course, start, end, callbackD
 	});
 
 }
+
 
 
 module.exports = {
